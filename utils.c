@@ -3,11 +3,12 @@
 
 #include "include/ft_nm.h"
 
-void	free_all(t_info	*info, int	size)
+void	free_all(t_info	*info)
 {
-	munmap(info->m_elf, size);
+	// todo: run valgrind to check for memory leaks
+	munmap(info->m_elf, info->elf_size);
 	free(info->output_tab);
-	free(info->my_symbols);
+	// free(info->my_symbols);
 	free(info);
 }
 

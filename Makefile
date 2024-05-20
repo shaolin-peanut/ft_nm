@@ -3,7 +3,7 @@ NAME = ft_nm
 HEADERDIR = include/
 HEADERS = $(HEADERDIR)ft_nm.h
 
-FILES = main.c parse_elf.c utils.c process_symbols.c
+FILES = main.c utils.c process_symbols.c
 
 OBJDIR = objs/
 OBJLIST = $(patsubst %.c, %.o, $(FILES))
@@ -27,6 +27,9 @@ $(OBJS): $(FILES)
 	@echo "Compiling ft_nm: $(FILES) and $(HEADERS)"
 	@$(CC) $(FLAGS) -c $(FILES)
 	@mv $(OBJLIST) $(OBJDIR)
+
+docker-up:
+	docker compose up --build --detach
 
 clean:
 	@echo "Deleting object files in /objs"

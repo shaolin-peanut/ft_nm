@@ -22,22 +22,23 @@ typedef	struct s_row {
 	bool	print;
 }	t_row;
 
-typedef struct s_symbol {
-	char				*name;
-	void				*value;
-	long unsigned int	size;
-	unsigned int		type;
-	unsigned int		binding;
-	unsigned int		visibility;
-	void				*section;
-	char				*section_name;
-	int					section_flags;
-	bool				small	;
+// typedef struct s_symbol {
+// 	char				*name;
+// 	void				*value;
+// 	long unsigned int	size;
+// 	unsigned int		type;
+// 	unsigned int		binding;
+// 	unsigned int		visibility;
+// 	void				*section;
+// 	char				*section_name;
+// 	int					section_flags;
+// 	bool				small	;
 	
-}	t_symbol;
+// }	t_symbol;
 
 typedef struct	s_info {
 	char		*m_elf;
+	int			elf_size;
 	void		*sym_tab;
 	int			symsize;
 	int			symcount;
@@ -45,14 +46,14 @@ typedef struct	s_info {
 	void		*sym_str_tab;
 	bool		is32;
 	int			type;
-	t_symbol	*my_symbols;
+	void		*symbols;
 	t_row		*output_tab;
 }	t_info;
-
 
 // utils
 void	exit_err(char *msg, int exit_code);
 bool	check_elf_validity(char *mapped_elf);
+void	free_all(t_info	*info);
 
 // parse_elf.c
 void	parse_elf(t_info	*info);

@@ -33,7 +33,7 @@ void	parse_symbols(t_info	*info)
 		Elf64_Sym	*symbol = 0;
 		t_symbol	*mysym = 0;
 
-		info->my_symbols = (t_symbol *) malloc(sizeof(t_symbol) * info->symcount);
+		info->symbols = (Elf64_Sym *) malloc(sizeof(Elf64_Sym) * info->symcount);
 
 		for (int i = 0; i < info->symcount; i++)
 		{
