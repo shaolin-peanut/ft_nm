@@ -11,51 +11,70 @@ char    *get_sym_name_ptr(t_info *info, int i)
     }
 }
 
-void    *get_value(t_info *info, int i)
+uint64_t    get_value(t_info *info, int i)
 {
     if (info->is32) {
         Elf32_Sym   *sym = (Elf32_Sym *) (info->sym_tab + (i * info->symsize));
-        return ((void *)((Elf32_Addr)(sym->st_value)));
+        return ((uint64_t)(sym->st_value));
     } else {
         Elf64_Sym   *sym = (Elf64_Sym *) (info->sym_tab + (i * info->symsize));
-        return ((void *)((Elf64_Addr)(sym->st_value)));
+        return ((uint64_t)(sym->st_value));
     }
 }
 
 char    get_type32(t_info   *info, int i)
 {
-    Elf32_Sym   *sym = (Elf32_Sym *) (info->sym_tab + (i * info->symsize));
-    bool        undef = sym->st_shndx == SHN_UNDEF;
-    bool        local;
-    // set up a var for type, section flags, and binding, with proper elf.h format
-    // Elf32_Shdr  *section = (Elf32_Shdr *) sym->st_shndx;
-    // Elf32_Shdr  *section_name = (char *)(info->sh_str_tab + section->sh_name);
-    // double check with man elf to make sure these types are the right ones
-    // Elf32_Word  section_flags = section->sh_flags;
+    Elf32_Ehdr      *elf_header = (Elf32_Ehdr *) info->m_elf;
+    Elf32_Sym       *sym = (Elf32_Sym *) (info->sym_tab + (i * info->symsize));
+    Elf32_Shdr      *section_headers = NULL;
+    Elf32_Shdr      section;
+    Elf32_Word      sh_type = 0;
+    Elf32_Xword     sh_flags = 0;
+
+    bool            index_too_big = (sym->st_shndx >= (elf_header->e_shnum));
+    bool            undef = (sym->st_shndx == SHN_UNDEF);
+    bool            intel_small = false;
+    bool            local = false;
+
+    if (!index_too_big || undef) {
+        section_headers = (Elf32_Shdr *)(info->m_elf + elf_header->e_shoff);
+        section = section_headers[sym->st_shndx];
+        sh_type = section.sh_type;
+        sh_flags = section.sh_flags;
+        intel_small = sh_flags & SHF_IA_64_SHORT;
+    }
     Elf32_Word  binding = ELF32_ST_BIND (sym->st_info);
     Elf32_Word  type = ELF32_ST_TYPE (sym->st_info);
 
+    local = binding == STB_LOCAL;
+
     // char    *n = sym->section_name;
-    if (sym->st_shndx == SHN_ABS)
-        return ('A');
-    // W is good, w was applied to one of 4 expected matches
-    if (binding == STB_WEAK) // W is good, w was applied to one of 4 expected matches
+    if (sym->st_shndx == SHN_ABS) {
+        return type == STT_FILE ? 'F' : 'A';
+    }
+	if (binding == STB_WEAK)
         return (undef ? 'w' : 'W');
-    if (type == STT_COMMON || (type && sym->st_shndx == SHN_COMMON))
+	if (undef && (type == STT_NOTYPE || type == STT_FUNC))
+        return ('U');
+    if (type == STT_COMMON || (type == STT_OBJECT && sym->st_shndx == SHN_COMMON))
         return ('C');
-    if (binding == STT_SECTION)
-        return ('S');
-    if (type == STT_FILE)
-        return ('F');
+    if ((type == STT_OBJECT || type == STT_NOTYPE) && (section.sh_flags & SHF_ALLOC)) {
+        if (sh_type == SHT_NOBITS) // it's in the bss section, or sbss if small
+			return intel_small ? (local? 's':'S'):(local? 'b':'B');
+        else if (section.sh_flags & SHF_WRITE) // not in bss, so it's initialized data section (g for small, d for regular)
+            return intel_small ? (local? 'g' : 'G') : (local? 'd' : 'D');
+        return local? 'r' : 'R'; // RO (const) data section if it fits all these but not writeable
+    }
+    if (type == STT_FUNC && section.sh_flags & SHF_EXECINSTR)
+        return (local ? 't' : 'T');
+    if (type == STT_SECTION)
+        return ('X');
     if (type == STT_TLS)
         return ('T');
-    if (type == STT_NOTYPE) {
-        if (sym->st_shndx == SHN_UNDEF)
-            return ('S');
-    }
+     
     if (type == STT_GNU_IFUNC)
         return ('i');
-
+    return ('?');
 }
 
 char    get_type64(t_info  *info, int  i)
@@ -72,33 +91,26 @@ char    get_type64(t_info  *info, int  i)
     bool            intel_small = false;
     bool            local = false;
 
-    char            *n = 0;
-
     if (!index_too_big || undef) {
         section_headers = (Elf64_Shdr *)(info->m_elf + elf_header->e_shoff);
         section = section_headers[sym->st_shndx];
         sh_type = section.sh_type;
         sh_flags = section.sh_flags;
         intel_small = sh_flags & SHF_IA_64_SHORT;
-        n = (char *)(info->sh_str_tab + section.sh_name);
     }
     Elf64_Word  binding = ELF64_ST_BIND (sym->st_info);
     Elf64_Word  type = ELF64_ST_TYPE (sym->st_info);
 
     local = binding == STB_LOCAL;
 
-    // char    *n = sym->section_name;
-    if (sym->st_shndx == SHN_ABS)
-        return type == STT_FILE ? 'F' : 'A';
-    // W is good, w was applied to one of 4 expected matches
+    if (sym->st_shndx == SHN_ABS) {
+        return type == STT_FILE ? 'F' : 'A'; }
 	if (binding == STB_WEAK)
         return (undef ? 'w' : 'W');
 	if (undef && (type == STT_NOTYPE || type == STT_FUNC))
         return ('U');
-    
     if (type == STT_COMMON || (type == STT_OBJECT && sym->st_shndx == SHN_COMMON))
         return ('C');
-    //  
     if ((type == STT_OBJECT || type == STT_NOTYPE) && (section.sh_flags & SHF_ALLOC)) {
         if (sh_type == SHT_NOBITS) // it's in the bss section, or sbss if small
 			return intel_small ? (local? 's':'S'):(local? 'b':'B');
@@ -176,29 +188,40 @@ int    count_symbols(t_info *info)
     return out_i;
 }
 
+void    print_symbols(t_row *tab, int count)
+{
+    for (int i = 0; i < count; i++)
+    {
+        if (tab[i].value || tab[i].type == 'T')
+            printf("%016lx ", (long unsigned int) tab[i].value);
+        else
+            printf("%16c ", ' ');
+        printf("%c ", tab[i].type);
+        if (tab[i].name)
+            printf("%s\n", tab[i].name);
+    }
+}
+
 void    process_symbols(t_info  *info)
 {
     int symc = count_symbols(info);
     t_row   output_tab[symc];
-    int foundc = 0;
-    int notfound = 0;
-    int tab_len = 0;
 
     fill_tab(output_tab, info, symc);
     
     sort(output_tab, 0, symc - 1);
 
-    for (int i = 0; i < symc; i++)
-    {
-            output_tab[i].print = true;
-            if (output_tab[i].value)
-                printf("%016lx ", (long unsigned int) output_tab[i].value);
-            else
-                printf("%016s ", " ");
-            if (output_tab[i].type)
-                printf("%c ", output_tab[i].type);
-            if (output_tab[i].name)
-                printf("%-35s \n", output_tab[i].name);
+    print_symbols(output_tab, symc);
+    // for (int i = 0; i < symc; i++)
+    // {
+    //         output_tab[i].print = true;
+    //         if (output_tab[i].value && output_tab[i].type == 'T')
+    //             printf("%016lx ", (long unsigned int) output_tab[i].value);
+    //         else
+    //             printf("%16c ", ' ');
+    //         printf("%c ", output_tab[i].type);
+    //         if (output_tab[i].name)
+    //             printf("%s\n", output_tab[i].name);
 
-    }
+    // }
 }

@@ -1,5 +1,31 @@
 # include "include/ft_nm.h"
 
+// utils
+
+char  *strip_prefix(char *name)
+{
+  int prefix_count = (name[0] == '_' ? 1 : 0) + (name[1] == '_' ? 1 : 0);
+  return (name + prefix_count);
+}
+
+bool inferior_or_equal(t_row *array, int left, int right)
+{
+  char  *sleft = strip_prefix(array[left].name);
+  char  *sright = strip_prefix(array[right].name);
+
+  int difference = strcasecmp(sleft, sright);
+  return (difference < 0 ? true : !(difference > 0));
+}
+
+void  swap(t_row *array, int left, int right)
+{
+  t_row temp = array[left];
+  array[left] = array[right];
+  array[right] = temp;
+}
+
+// quicksort
+
 void  sort(t_row  *array, int low, int high)
 {
   if (low >= high || low < 0)
@@ -9,42 +35,18 @@ void  sort(t_row  *array, int low, int high)
   sort(array, pivot + 1, high);
 }
 
-char  *get_name(t_row *array, int index)
-{
-  int plus = (array[index].name[0] == '_' ? 1 : 0) + (array[index].name[1] == '_' ? 1 : 0);
-  return (array[index].name + plus);
-}
-
-bool inferior_or_equal(t_row *array, int right, int high)
-{
-    int difference = strcasecmp(get_name(array, right), get_name(array, high));
-    if (difference < 0)
-        return true;
-    else if (difference > 0)
-        return false;
-    return right <= high;
-}
-
 int partition(t_row *array, int low, int high)
 {
-    int left = low;
-
     for (int right = low; right < high; right++)
     {
-      int plus = (array[right].name[0] == '_' ? 1 : 0) + (array[right].name[1] == '_' ? 1 : 0);
       if (inferior_or_equal(array, right, high))
       { 
-        t_row temp = array[left];
-        array[left] = array[right];
-        array[right] = temp;
-        left++;
+        swap(array, low, right);
+        low++;
       }// if less than or equal to pivot, swap array[j] and pivot
     }
-    t_row temp = array[left];
-    array[left] = array[high];
-    array[high] = temp;
-
-    return (left);
+    swap(array, low, high);
+    return (low);
 }
 
 

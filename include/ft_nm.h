@@ -16,25 +16,11 @@
 # include <elf.h>
 
 typedef	struct s_row {
-	void	*value;
-	char	type;
-	char	*name;
-	bool	print;
+	uint16_t	value;
+	char		type;
+	char		*name;
+	bool		print;
 }	t_row;
-
-// typedef struct s_symbol {
-// 	char				*name;
-// 	void				*value;
-// 	long unsigned int	size;
-// 	unsigned int		type;
-// 	unsigned int		binding;
-// 	unsigned int		visibility;
-// 	void				*section;
-// 	char				*section_name;
-// 	int					section_flags;
-// 	bool				small	;
-	
-// }	t_symbol;
 
 typedef struct	s_info {
 	char		*m_elf;

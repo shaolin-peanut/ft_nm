@@ -11,7 +11,7 @@ OBJS = $(addprefix $(OBJDIR), $(OBJLIST))
 
 
 CC = gcc
-FLAGS = # -Wall -Wextra -Werror
+FLAGS = -Wall -Wextra -Werror
 FSAN = # -fsanitize=address
 DEBUGGER = gdb
 DBG =  -g
