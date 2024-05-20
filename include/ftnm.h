@@ -10,6 +10,4 @@ typedef struct	s_info {
 	bool	is32;
 }	t_info;
 
-void	parse_elf(t_info	*info);
-
 #endif

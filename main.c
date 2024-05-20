@@ -39,7 +39,7 @@ void	parse_elf(t_info	*info)
 		Elf64_Shdr	*elf_section_hdr = NULL;
 		Elf64_Shdr	strtab_sh;
 
-		elf_header = (Elf64_Ehdr *)info->m_elf;
+		elf_header = (Elf64_Ehdr *) info->m_elf;
 		elf_section_hdrs = (Elf64_Shdr *)((char *)info->m_elf + elf_header->e_shoff);
 
 		printf("Section Headers:\n");
@@ -52,24 +52,23 @@ void	parse_elf(t_info	*info)
 
 		// find symtab
 		for (int i = 0; i < elf_header->e_shnum; i++){
-			// printf(" [%2d]", i);
 			elf_section_hdr = &elf_section_hdrs[i];
 
-			if (
-				(elf_section_hdr->sh_type == SHT_SYMTAB
-				|| elf_section_hdr->sh_type == SHT_DYNSYM)
-				&& elf_section_hdr->sh_link != 0)
-			{
+			// if (
+			// 	(elf_section_hdr->sh_type == SHT_SYMTAB
+			// 	|| elf_section_hdr->sh_type == SHT_DYNSYM)
+			// 	&& elf_section_hdr->sh_link != 0)
+			// {
 				info->sym_tab = (void *) info->m_elf + elf_section_hdr->sh_offset;
-				break;
-			// 	char* sh_name_str = (char*)(info->str_tab + elf_section_hdr->sh_name);
+				// break;
+				char* sh_name_str = (char*)(info->str_tab + elf_section_hdr->sh_name);
 
-			// 	printf(" %-16s (%2x) %016lx %08lx %08lx %4x %4x %4x %4x\n",
-			// 		sh_name_str, elf_section_hdr->sh_type,
-			// 		elf_section_hdr->sh_addr, elf_section_hdr->sh_offset,
-			// 		elf_section_hdr->sh_size, elf_section_hdr->sh_entsize,
-			// 		elf_section_hdr->sh_flags, elf_section_hdr->sh_link,
-			// 		elf_section_hdr->sh_info);
+				printf(" %-16s (%2x) %016lx %08lx %08lx %4x %4x %4x %4x\n",
+					sh_name_str, elf_section_hdr->sh_type,
+					elf_section_hdr->sh_addr, elf_section_hdr->sh_offset,
+					elf_section_hdr->sh_size, elf_section_hdr->sh_entsize,
+					elf_section_hdr->sh_flags, elf_section_hdr->sh_link,
+					elf_section_hdr->sh_info);
 			// }
 		}
 		// looop through symbol table. TODO: get number of symbols or other iterator from symtab section header
