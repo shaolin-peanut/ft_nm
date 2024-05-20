@@ -3,14 +3,13 @@ NAME = ftnm
 HEADERDIR = include/
 HEADERS = $(HEADERDIR)ftnm.h
 
-FILES = main.c
+FILES = main.c parseelf.c utils.c
 
 OBJDIR = objs/
 OBJLIST = $(patsubst %.c, %.o, $(FILES))
 OBJS = $(addprefix $(OBJDIR), $(OBJLIST))
 
 CC = gcc
-FLAGS = # -Wall -Wextra -Werror
 DEBUGGER = gdb
 DEBUG_FLGS = -g
 
@@ -18,14 +17,15 @@ all = $(NAME)
 
 $(NAME): $(OBJDIR) $(OBJS)
 	@echo "Linking ftnm: $(OBJS)"
-	@$(CC) $(OBJS) $(FLAGS) -o $(NAME)
+	@$(CC) $(OBJS) -o $(NAME)
 
 $(OBJDIR):
 	@mkdir -p $(OBJDIR)
 
 $(OBJS): $(FILES)
 	@echo "Compiling ftnm: $(FILES) and $(HEADERS)"
-	@$(CC) $(FLAGS) -I$(HEADERDIR) -c $< -o $@
+	@$(CC) -c $(FILES)
+	@mv $(OBJLIST) $(OBJDIR)
 
 clean:
 	@echo "Deleting object files in /objs"
