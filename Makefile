@@ -14,20 +14,20 @@ CC = gcc
 FLAGS = # -Wall -Wextra -Werror
 FSAN = -fsanitize=address
 DEBUGGER = gdb
-DBG = -g
+DBG = # -g
 
 all = $(NAME)
 
 $(NAME): $(OBJDIR) $(OBJS)
 	@echo "Linking ft_nm: $(OBJS)"
-	@$(CC) $(OBJS) $(FSAN)  -o $(NAME)
+	@$(CC) $(OBJS) $(FSAN) -o $(NAME)
 
 $(OBJDIR):
 	@mkdir -p $(OBJDIR)
 
 $(OBJS): $(FILES)
 	@echo "Compiling ft_nm: $(FILES) and $(HEADERS)"
-	@$(CC) $(FLAGS) -c $(FILES)
+	@$(CC) $(FLAGS) $(DBG) -c $(FILES)
 	@mv $(OBJLIST) $(OBJDIR)
 
 docker-up:

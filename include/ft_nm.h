@@ -16,7 +16,7 @@
 # include <elf.h>
 
 typedef	struct s_row {
-	char	*value;
+	void	*value;
 	char	type;
 	char	*name;
 	bool	print;
