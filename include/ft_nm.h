@@ -56,6 +56,10 @@ bool	check_elf_validity(char *mapped_elf);
 void	free_all(t_info	*info);
 void	swap_ptr(void *a, void *b);
 
+// sort
+void	sort(t_row *array, int low, int high);
+int		partition(t_row *array, int low, int high);
+
 // parse_elf.c
 void	parse_elf(t_info	*info);
 
