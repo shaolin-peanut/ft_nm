@@ -1,4 +1,4 @@
-# include "include/ftnm.h"
+# include "include/ft_nm.h"
 
 int	main(int argc, char **argv)
 {
@@ -13,6 +13,7 @@ int	main(int argc, char **argv)
 	info->sym_tab = 0;
 	info->str_tab = 0;
 	info->is32 = false;
+	info->type = 0;
 
 	if (argc < 2)
 		exit_err("no binary file found", 1);
@@ -27,7 +28,10 @@ int	main(int argc, char **argv)
 	if((mapped_elf = mmap(NULL, elf_info.st_size, PROT_READ, MAP_PRIVATE, fd, 0)) == MAP_FAILED)
 		exit_err("Failed to map file to memory", 42);
 
-	check_elf_validity(mapped_elf);
+	if (check_elf_validity(mapped_elf) == false) {
+		printf("mapped elf: %2x%c%c%c", mapped_elf[0], mapped_elf[1], mapped_elf[2], mapped_elf[3]);
+		exit_err("Invalid binary file", 8080);
+	}
 
 	info->m_elf = mapped_elf;
 	elf_ident = (unsigned char*)mapped_elf;

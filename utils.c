@@ -1,7 +1,7 @@
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 
-#include "include/ftnm.h"
+#include "include/ft_nm.h"
 
 void	exit_err(char *msg, int exit_code)
 {
@@ -9,13 +9,14 @@ void	exit_err(char *msg, int exit_code)
 	exit(exit_code);
 }
 
-void	check_elf_validity(char	*mapped_elf)
-{
-	if (!(mapped_elf[0] == ELFMAG0
+bool check_elf_validity(char *mapped_elf) {
+	return (
+		mapped_elf[0] == ELFMAG0
 		&& mapped_elf[1] == 'E'
 		&& mapped_elf[2] == 'L'
-		&& mapped_elf[3] == 'F'))
-		exit_err("Invalid binary file", 1);
+		&& mapped_elf[3] == 'F'
+		);
 }
+
 
 #endif

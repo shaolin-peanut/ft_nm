@@ -1,9 +1,9 @@
-NAME = ftnm
+NAME = ft_nm
 
 HEADERDIR = include/
-HEADERS = $(HEADERDIR)ftnm.h
+HEADERS = $(HEADERDIR)ft_nm.h
 
-FILES = main.c parseelf.c utils.c
+FILES = main.c parse_elf.c utils.c process_symbols.c
 
 OBJDIR = objs/
 OBJLIST = $(patsubst %.c, %.o, $(FILES))
@@ -16,14 +16,14 @@ DEBUG_FLGS = -g
 all = $(NAME)
 
 $(NAME): $(OBJDIR) $(OBJS)
-	@echo "Linking ftnm: $(OBJS)"
+	@echo "Linking ft_nm: $(OBJS)"
 	@$(CC) $(OBJS) -o $(NAME)
 
 $(OBJDIR):
 	@mkdir -p $(OBJDIR)
 
 $(OBJS): $(FILES)
-	@echo "Compiling ftnm: $(FILES) and $(HEADERS)"
+	@echo "Compiling ft_nm: $(FILES) and $(HEADERS)"
 	@$(CC) -c $(FILES)
 	@mv $(OBJLIST) $(OBJDIR)
 
