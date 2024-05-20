@@ -15,6 +15,13 @@
 # include <inttypes.h>
 # include <elf.h>
 
+typedef	struct s_row {
+	char	*value;
+	char	type;
+	char	*name;
+	bool	print;
+}	t_row;
+
 typedef struct s_symbol {
 	char				*name;
 	void				*value;
@@ -24,6 +31,9 @@ typedef struct s_symbol {
 	unsigned int		visibility;
 	void				*section;
 	char				*section_name;
+	int					section_flags;
+	bool				small	;
+	
 }	t_symbol;
 
 typedef struct	s_info {
@@ -35,7 +45,8 @@ typedef struct	s_info {
 	void		*sym_str_tab;
 	bool		is32;
 	int			type;
-	t_symbol	*output_tab;
+	t_symbol	*my_symbols;
+	t_row		*output_tab;
 }	t_info;
 
 
@@ -47,6 +58,6 @@ bool	check_elf_validity(char *mapped_elf);
 void	parse_elf(t_info	*info);
 
 // process_symbols.c
-void	process_symbols(int symsize, int symcount, t_info  *info);
+void	process_symbols(t_info  *info);
 
 #endif

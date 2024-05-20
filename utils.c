@@ -3,6 +3,14 @@
 
 #include "include/ft_nm.h"
 
+void	free_all(t_info	*info, int	size)
+{
+	munmap(info->m_elf, size);
+	free(info->output_tab);
+	free(info->my_symbols);
+	free(info);
+}
+
 void	exit_err(char *msg, int exit_code)
 {
 	printf("nm: %s\n", msg);

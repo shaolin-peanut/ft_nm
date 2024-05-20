@@ -18,14 +18,14 @@ all = $(NAME)
 
 $(NAME): $(OBJDIR) $(OBJS)
 	@echo "Linking ft_nm: $(OBJS)"
-	@$(CC) $(OBJS) -o $(NAME)
+	@$(CC) $(OBJS) -fsanitize=address -o $(NAME)
 
 $(OBJDIR):
 	@mkdir -p $(OBJDIR)
 
 $(OBJS): $(FILES)
 	@echo "Compiling ft_nm: $(FILES) and $(HEADERS)"
-	@$(CC) $(FLAGS) -g -c $(FILES)
+	@$(CC) $(FLAGS) -c $(FILES)
 	@mv $(OBJLIST) $(OBJDIR)
 
 clean:

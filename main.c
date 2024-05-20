@@ -47,12 +47,9 @@ int	main(int argc, char **argv)
 	parse_elf(info);
 
 	print_symbols(info);
-	// process_symbols
+	
+	process_symbols(info);
 
-	munmap(mapped_elf, elf_info.st_size);
-	// for (int i = 0; i < info->symcount; i++)
-	// 	free(info->output_tab[i]);
-	free(info->output_tab);
-	free(info);
+	free_all(info, elf_info.st_size);
 	close(fd);
 }

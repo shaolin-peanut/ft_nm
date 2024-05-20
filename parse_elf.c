@@ -5,12 +5,12 @@
 
 void	print_symbols(t_info	*info)
 {
-	printf(" name                                    | value            | size     | type     | bind | visi |            |\n");
+	printf(" name                                    | value            | size     | type     | bind | visi | section name|\n");
 	printf("------------------------------------------------------------------------------------------------------------------|\n");
 	for (int i = 0; i < info->symcount; i++)
 	{
-		t_symbol	*sym = &info->output_tab[i];
-		printf("%-40s | %16lx | %8lx | %8lx | %4x | %4x | %.10s\n",
+		t_symbol	*sym = &info->my_symbols[i];
+		printf("%-40s | %16lx | %8lx | %8lx | %4x | %4x | %s\n",
 					sym->name,
 					sym->value,
 					sym->size,
@@ -33,12 +33,12 @@ void	parse_symbols(t_info	*info)
 		Elf64_Sym	*symbol = 0;
 		t_symbol	*mysym = 0;
 
-		info->output_tab = (t_symbol *) malloc(sizeof(t_symbol) * info->symcount);
+		info->my_symbols = (t_symbol *) malloc(sizeof(t_symbol) * info->symcount);
 
 		for (int i = 0; i < info->symcount; i++)
 		{
 			symbol = (Elf64_Sym *)((char *)info->sym_tab + (i * info->symsize));
-			mysym = &info->output_tab[i];
+			mysym = &info->my_symbols[i];
 
 			mysym->name = symbol->st_name ? (char *)(info->sym_str_tab + symbol->st_name) : NULL;
 			mysym->value = (long unsigned int) symbol->st_value;
@@ -49,12 +49,21 @@ void	parse_symbols(t_info	*info)
 
 			mysym->section = 0;
 			mysym->section_name = 0;
+			mysym->section_flags = 0;
+			mysym->small = false;
+
 			if (symbol->st_shndx != SHN_UNDEF && symbol->st_shndx < elf_header->e_shnum)
 			{
-				mysym->section = (void *) &elf_section_hdrs[symbol->st_shndx];
-				Elf64_Shdr *section = (Elf64_Shdr *)mysym->section;
-				char *name = (char *)(info->sh_str_tab + section->sh_name);
-					mysym->section_name = name ? name : NULL;
+				mysym->section = symbol->st_shndx == SHN_ABS ? SHN_ABS : (void *) &elf_section_hdrs[symbol->st_shndx];
+
+				Elf64_Shdr *section = (Elf64_Shdr *) mysym->section;
+				char *section_name = (char *)(info->sh_str_tab + section->sh_name);
+				mysym->section_name = strlen(section_name) > 0 ? section_name : NULL;
+				mysym->section_flags = section->sh_flags;
+				if (section->sh_flags & SHF_IA_64_SHORT)
+					mysym->small = true;
+			} else {
+				mysym->section = SHN_UNDEF;
 			}
 		
 			section = 0;
@@ -65,26 +74,7 @@ void	parse_symbols(t_info	*info)
 void	parse_elf(t_info	*info)
 {
 	if (info->is32) {
-		// Elf32_Ehdr	*elf_header;
-		// Elf32_Shdr	**elf_section_hdrs;
-		// Elf32_Shdr	*elf_section_hdr;
-		int			off;
-		int			size;
-		off = 0;
-		size = 0;
-
-		// // set up pointers elf header, section headers and get the section headers total size
-		// elf_header = (Elf32_Ehdr *)info->m_elf;
-		// elf_section_hdrs = (Elf32_Shdr **)(info->m_elf + elf_header->e_shoff);
-		// size = elf_header->e_shentsize * elf_header->e_shnum;
-
-		// // Loop through sections to find the symbol table
-		// for (off = elf_header->e_shoff; off < size; off += elf_header->e_shentsize)
-		// {
-		// 	elf_section_hdr = (Elf32_Shdr *) info->m_elf + off;
-		// 	if (elf_section_hdr->sh_type == SHT_SYMTAB || elf_section_hdr->sh_type == SHT_DYNSYM)
-		// 		printf("found sym tab");
-		// }
+		// todo
 	} else {
 		// headers
 		Elf64_Ehdr	*elf_header = NULL;
