@@ -24,7 +24,8 @@ typedef struct s_output {
 typedef struct	s_info {
 	char		*m_elf;
 	void		*sym_tab;
-	void		*str_tab;
+	void		*sh_str_tab;
+	void		*sym_str_tab;
 	bool		is32;
 	int			type;
 	t_output	*output_tab;

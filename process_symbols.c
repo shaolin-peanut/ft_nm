@@ -11,7 +11,6 @@ void    add_to_output_tab(char  *name)
 // global or local (that's an if later on, to make upper case or lowercase)
 // section specific (bss, text, etc)
 
-
 void    process_symbols(int symsize, int symcount, t_info  *info)
 {
     Elf64_Ehdr  *elf_header = (Elf64_Ehdr *) info->m_elf;
@@ -21,17 +20,15 @@ void    process_symbols(int symsize, int symcount, t_info  *info)
     {
         symbol = (Elf64_Sym *)((char *)info->sym_tab + (i * symsize));
         if (symbol->st_name != 0) {
-            char	*sym_name = (char *)(info->str_tab + symbol->st_name);
-            printf("%" PRIu64 "\n", symbol->st_value);
-            printf("%s ", sym_name);
+            char	*sym_name = (char *)(info->sym_str_tab + symbol->st_name);
 
-            // printf(" %-16s %4x %s %c %c %s\n",
-            //         sym_name,   // Symbol name (left-aligned, 16 characters)
-            //         symbol->st_value, // Symbol value (hexadecimal)
-            //         symbol->st_info & 0x0F ? "FUNC" : "VAR",  // Symbol type (function or variable)
-            //         ELF64_ST_BIND(symbol->st_info) == STB_LOCAL ? 'l' : 'g',  // Symbol binding (local or global)
-            //         ELF64_ST_VISIBILITY(symbol->st_info) == STV_HIDDEN ? 'h' : ' ', // Symbol visibility (hidden or default)
-            //         symbol->st_shndx == SHN_UNDEF ? "UNDEF" : "");  // Symbol section (undefined or other)
+            printf(" %s %4x %s %c %c %s\n",
+                    sym_name,   // Symbol name (left-aligned, 16 characters)
+                    symbol->st_value, // Symbol value (hexadecimal)
+                    symbol->st_info & 0x0F ? "FUNC" : "VAR",  // Symbol type (function or variable)
+                    ELF64_ST_BIND(symbol->st_info) == STB_LOCAL ? 'l' : 'g',  // Symbol binding (local or global)
+                    ELF64_ST_VISIBILITY(symbol->st_info) == STV_HIDDEN ? 'h' : ' ', // Symbol visibility (hidden or default)
+                    symbol->st_shndx == SHN_UNDEF ? "UNDEF" : "");  // Symbol section (undefined or other)
         }
     }
     // types

@@ -9,6 +9,7 @@ OBJDIR = objs/
 OBJLIST = $(patsubst %.c, %.o, $(FILES))
 OBJS = $(addprefix $(OBJDIR), $(OBJLIST))
 
+
 CC = gcc
 DEBUGGER = gdb
 DEBUG_FLGS = -g
@@ -24,7 +25,7 @@ $(OBJDIR):
 
 $(OBJS): $(FILES)
 	@echo "Compiling ft_nm: $(FILES) and $(HEADERS)"
-	@$(CC) -c $(FILES)
+	@$(CC) $(FLAGS) -g -c $(FILES)
 	@mv $(OBJLIST) $(OBJDIR)
 
 clean:

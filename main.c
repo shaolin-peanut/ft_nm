@@ -11,7 +11,8 @@ int	main(int argc, char **argv)
 	info = (t_info *) malloc(sizeof(t_info) * 1);
 	info->m_elf = 0;
 	info->sym_tab = 0;
-	info->str_tab = 0;
+	info->sh_str_tab = 0;
+	info->sym_str_tab = 0;
 	info->is32 = false;
 	info->type = 0;
 	info->output_tab = 0;
