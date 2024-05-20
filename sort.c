@@ -15,21 +15,30 @@ char  *get_name(t_row *array, int index)
   return (array[index].name + plus);
 }
 
+bool inferior_or_equal(t_row *array, int right, int high)
+{
+    int difference = strcasecmp(get_name(array, right), get_name(array, high));
+    if (difference < 0)
+        return true;
+    else if (difference > 0)
+        return false;
+    return right <= high;
+}
+
 int partition(t_row *array, int low, int high)
 {
     int left = low;
-    char *pivot = get_name(array, high);
 
     for (int right = low; right < high; right++)
     {
       int plus = (array[right].name[0] == '_' ? 1 : 0) + (array[right].name[1] == '_' ? 1 : 0);
-      if (strcasecmp(get_name(array, right), pivot) < 0)
-      { // if less than or equal to pivot, swap array[j] and pivot
+      if (inferior_or_equal(array, right, high))
+      { 
         t_row temp = array[left];
         array[left] = array[right];
         array[right] = temp;
         left++;
-      }
+      }// if less than or equal to pivot, swap array[j] and pivot
     }
     t_row temp = array[left];
     array[left] = array[high];
