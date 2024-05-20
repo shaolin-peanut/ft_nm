@@ -15,20 +15,27 @@
 # include <inttypes.h>
 # include <elf.h>
 
-typedef struct s_output {
-	long unsigned int	value;
-	char				type;
+typedef struct s_symbol {
 	char				*name;
-}	t_output;
+	void				*value;
+	long unsigned int	size;
+	unsigned int		type;
+	unsigned int		binding;
+	unsigned int		visibility;
+	void				*section;
+	char				*section_name;
+}	t_symbol;
 
 typedef struct	s_info {
 	char		*m_elf;
 	void		*sym_tab;
+	int			symsize;
+	int			symcount;
 	void		*sh_str_tab;
 	void		*sym_str_tab;
 	bool		is32;
 	int			type;
-	t_output	*output_tab;
+	t_symbol	*output_tab;
 }	t_info;
 
 

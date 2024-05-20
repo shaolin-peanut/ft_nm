@@ -11,11 +11,13 @@ int	main(int argc, char **argv)
 	info = (t_info *) malloc(sizeof(t_info) * 1);
 	info->m_elf = 0;
 	info->sym_tab = 0;
+	info->symsize = 0;
+	info->symcount = 0;
 	info->sh_str_tab = 0;
 	info->sym_str_tab = 0;
 	info->is32 = false;
 	info->type = 0;
-	info->output_tab = 0;
+	// info->output_tab = 0;
 
 	if (argc < 2)
 		exit_err("no binary file found", 1);
@@ -44,7 +46,13 @@ int	main(int argc, char **argv)
 
 	parse_elf(info);
 
+	print_symbols(info);
+	// process_symbols
+
 	munmap(mapped_elf, elf_info.st_size);
+	// for (int i = 0; i < info->symcount; i++)
+	// 	free(info->output_tab[i]);
+	free(info->output_tab);
 	free(info);
 	close(fd);
 }
