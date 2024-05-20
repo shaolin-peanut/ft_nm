@@ -14,6 +14,7 @@ int	main(int argc, char **argv)
 	info->str_tab = 0;
 	info->is32 = false;
 	info->type = 0;
+	info->output_tab = 0;
 
 	if (argc < 2)
 		exit_err("no binary file found", 1);

@@ -15,19 +15,21 @@
 # include <inttypes.h>
 # include <elf.h>
 
-typedef struct	s_info {
-	char	*m_elf;
-	void	*sym_tab;
-	void	*str_tab;
-	bool	is32;
-	int		type;
-}	t_info;
-
 typedef struct s_output {
 	long unsigned int	value;
 	char				type;
 	char				*name;
-}
+}	t_output;
+
+typedef struct	s_info {
+	char		*m_elf;
+	void		*sym_tab;
+	void		*str_tab;
+	bool		is32;
+	int			type;
+	t_output	*output_tab;
+}	t_info;
+
 
 // utils
 void	exit_err(char *msg, int exit_code);

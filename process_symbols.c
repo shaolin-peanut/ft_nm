@@ -7,6 +7,11 @@ void    add_to_output_tab(char  *name)
     // output->name = name;
 }
 
+// types
+// global or local (that's an if later on, to make upper case or lowercase)
+// section specific (bss, text, etc)
+
+
 void    process_symbols(int symsize, int symcount, t_info  *info)
 {
     Elf64_Ehdr  *elf_header = (Elf64_Ehdr *) info->m_elf;
