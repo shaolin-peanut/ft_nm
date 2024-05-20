@@ -11,14 +11,16 @@ OBJS = $(addprefix $(OBJDIR), $(OBJLIST))
 
 
 CC = gcc
+FLAGS = # -Wall -Wextra -Werror
+FSAN = -fsanitize=address
 DEBUGGER = gdb
-DEBUG_FLGS = -g
+DBG = -g
 
 all = $(NAME)
 
 $(NAME): $(OBJDIR) $(OBJS)
 	@echo "Linking ft_nm: $(OBJS)"
-	@$(CC) $(OBJS) -fsanitize=address -o $(NAME)
+	@$(CC) $(OBJS) $(FSAN)  -o $(NAME)
 
 $(OBJDIR):
 	@mkdir -p $(OBJDIR)

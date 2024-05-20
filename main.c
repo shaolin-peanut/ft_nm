@@ -1,20 +1,20 @@
 # include "include/ft_nm.h"
 
-void	init_info(t_info	*info, char	*mapped_elf, int size)
+void	init_info(t_info	*info, int size)
 {
-	info->m_elf = mapped_elf;
+	info->m_elf = 0;
 	info->elf_size = size;
 	info->sym_tab = 0;
 	info->symsize = 0;
 	info->symcount = 0;
 	info->sh_str_tab = 0;
 	info->sym_str_tab = 0;
-	info->is32 = ((unsigned char)(*(mapped_elf + EI_CLASS))) == ELFCLASS32;
+	info->is32 = false;
 	info->type = 0;
 }
 
 // returns file size
-int	check_errs_and_map(int argc, char **argv, int *fd, char *mapped_elf)
+int	elf_setup(int argc, char **argv, int *fd, t_info *info)
 {
 	struct stat		elf_info;
 	int				ret;
@@ -28,16 +28,16 @@ int	check_errs_and_map(int argc, char **argv, int *fd, char *mapped_elf)
 	if((ret = fstat(*fd, &elf_info)) < 0)
 		exit_err("fstat error", 1);
 
-	if((mapped_elf = mmap(NULL, elf_info.st_size, PROT_READ, MAP_PRIVATE, *fd, 0)) == MAP_FAILED)
+	if((info->m_elf = mmap(NULL, elf_info.st_size, PROT_READ, MAP_PRIVATE, *fd, 0)) == MAP_FAILED)
 		exit_err("Failed to map file to memory", 42);
 
-	if (check_elf_validity(mapped_elf) == false) {
-		printf("mapped elf: %2x %c%c%c", mapped_elf[0], mapped_elf[1], mapped_elf[2], mapped_elf[3]);
+	if (check_elf_validity(info->m_elf) == false) {
 		exit_err("Invalid binary file", 8080);
 	}
 	return (elf_info.st_size);
 }
 
+// get the string tables and symbol metadata + pointers
 int	init_64(t_info	*info)
 {
 	Elf64_Ehdr	*elf_header = (Elf64_Ehdr *) info->m_elf;
@@ -69,34 +69,24 @@ int	init_64(t_info	*info)
 		}
 }
 
-// int	init_32(t_info	*info)
-// {
-	
-// }
-
 int	main(int argc, char **argv)
 {
-	int				fd;
-	int				elf_size;
+	int				fd = 0;
+	int				elf_size = 0;
 	char			*mapped_elf;
 	t_info			info_struct;
 	t_info			*info = &info_struct;
 
-	elf_size = check_errs_and_map(argc, argv, &fd, mapped_elf);
+	init_info(info, elf_size);
 
-	init_info(info, mapped_elf, elf_size);
+	elf_size = elf_setup(argc, argv, &fd, info);
+	info->is32 = (info->m_elf[EI_CLASS] == ELFCLASS32);
 
 	if (info->is32) {
 		// todo
 	}
 	else {
 		init_64(info);
-		Elf64_Sym	symbols[info->symcount];
-		for (int i = 0; i < info->symcount; i++) {
-			Elf64_Sym	*sym = (Elf64_Sym *)(info->sym_tab + i * info->symsize);
-			symbols[i] = *sym;
-		}
-		info->symbols = &symbols;
 
 		process_symbols(info);
 	}

@@ -1,5 +1,31 @@
 #include "include/ft_nm.h"
 
+char    *get_sym_name_ptr(t_info *info, int i)
+{
+    if (info->is32) {
+        Elf32_Sym   *sym = (Elf32_Sym *) (info->sym_tab + (i * info->symsize));
+        return ((char *)(info->sym_str_tab + sym->st_name));
+    } else {
+        Elf64_Sym   *sym = (Elf64_Sym *) (info->sym_tab + (i * info->symsize));
+        return ((char *)(info->sym_str_tab + sym->st_name));
+    }
+}
+
+char    *get_value32(t_info *info, int i)
+{
+    Elf32_Sym   *sym = (Elf32_Sym *) (info->sym_tab + (i * info->symsize));
+    char        *buf = ((char *)(sym->st_value));
+    if (buf)
+            printf("value: %s\n", buf);
+    return (buf);
+}
+
+char    *get_value64(t_info *info, int i)
+{
+    Elf64_Sym   *sym = (Elf64_Sym *) (info->sym_tab + (i * info->symsize));
+    return ((char *)(sym->st_value));
+}
+
 char    get_type32(t_info   *info, int i)
 {
     Elf32_Sym   *sym = (Elf32_Sym *) (info->sym_tab + (i * info->symsize));
@@ -16,24 +42,23 @@ char    get_type32(t_info   *info, int i)
     if (sym->st_shndx == SHN_ABS)
         return ('A');
     // W is good, w was applied to one of 4 expected matches
-    if (ELF32_ST_BIND (sym->st_info) == STB_WEAK)
+    if (binding == STB_WEAK)
         return (undef ? 'w' : 'W');
-    if (ELF32_ST_BIND (sym->st_info) == STB_WEAK) // W is good, w was applied to one of 4 expected matches
+    if (binding == STB_WEAK) // W is good, w was applied to one of 4 expected matches
         return (undef ? 'w' : 'W');
-    if (ELF32_ST_TYPE (sym->st_info) == STT_COMMON || (ELF32_ST_TYPE (sym->st_info) && sym->st_shndx == SHN_COMMON))
+    if (type == STT_COMMON || (type && sym->st_shndx == SHN_COMMON))
         return ('C');
-    if (ELF32_ST_BIND (sym->st_shndx) == STT_SECTION)
+    if (binding == STT_SECTION)
         return ('S');
-    if (ELF32_ST_TYPE (sym->st_info) == STT_FILE)
+    if (type == STT_FILE)
         return ('F');
-    if (ELF32_ST_TYPE (sym->st_info) == STT_TLS)
+    if (type == STT_TLS)
         return ('T');
-    if (ELF32_ST_TYPE (sym->st_info) == STT_NOTYPE) {
+    if (type == STT_NOTYPE) {
         if (sym->st_shndx == SHN_UNDEF)
             return ('S');
-        // else get section data
     }
-    if (ELF32_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
+    if (type == STT_GNU_IFUNC)
         return ('i');
 
 }
@@ -43,14 +68,14 @@ char    get_type64(t_info  *info, int  i)
     // todo
 }
 
-void    init_output_tab(t_row *output_tab, int count)
+void    init_output_tab(t_row *tab, int count)
 {
     for (int i = 0; i < count; i++)
     {
-        output_tab[i].value = 0;
-        output_tab[i].type = 0;
-        output_tab[i].print = false;
-        output_tab[i].name = 0;
+        tab[i].value = 0;
+        tab[i].type = 0;
+        tab[i].print = false;
+        tab[i].name = 0;
     }
 }
 
@@ -59,16 +84,20 @@ void    process_symbols(t_info  *info)
     t_row   output_tab[info->symcount];
     int foundc = 0;
     int notfound = 0;
+    char    *valptr = 0;
 
-    init_output_tab(&output_tab, info->symcount);
+    init_output_tab(output_tab, info->symcount);
+    // bzero(output_tab, sizeof(output_tab));
     
     for (int i = 0; i < info->symcount; i++) {
-        output_tab[i].type = get_type(info, i);
-        output_tab[i].name = info->symbols[i].st_name ? (char *)(info->sym_str_tab + info->symbols[i].st_name) : NULL;
-        if (output_tab[i].type) {
-            printf("type for %s: %c\n", sym->name, output_tab[i].type);
-            foundc++;
-        }
+        output_tab[i].value = info->is32 ? get_value32(info, i) : get_value64(info, i);
+        output_tab[i].type = info->is32 ? get_type32(info, i) : get_type64(info, i);
+        output_tab[i].name = get_sym_name_ptr(info, i);
+        printf("type for %s: %c\n", output_tab[i].name, output_tab[i].type);
+        // if (output_tab[i].type) {
+        //     printf("type for %s: %c\n", output_tab[i].name, output_tab[i].type);
+        //     foundc++;
+        // }
     }
         // if (sym->type == STT_OBJECT) {
         //     if (sym->section_flags & SHF_ALLOC) {
