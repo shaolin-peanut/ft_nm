@@ -1,0 +1,5 @@
+services:
+  ft_nm:
+    build: .
+    volumes:
+      - ./:/home/sbars
