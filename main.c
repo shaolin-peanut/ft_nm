@@ -38,7 +38,6 @@ void	parse_elf(t_info	*info)
 		Elf64_Shdr	*elf_section_hdrs = NULL;
 		Elf64_Shdr	*elf_section_hdr = NULL;
 		Elf64_Shdr	strtab_sh;
-		void		*strtab_ptr = NULL;
 
 		elf_header = (Elf64_Ehdr *)info->m_elf;
 		elf_section_hdrs = (Elf64_Shdr *)((char *)info->m_elf + elf_header->e_shoff);
@@ -46,28 +45,43 @@ void	parse_elf(t_info	*info)
 		printf("Section Headers:\n");
 		printf(" [Nr] Name (Type)       Addr         Off       Size   ESz   Flg Link  Info\n");
 
-        // 
+		// find string table section
 		strtab_sh = (Elf64_Shdr)(elf_section_hdrs[elf_header->e_shstrndx]);
+		// get string table offset, put in t_info
 		info->str_tab = (void *) info->m_elf + strtab_sh.sh_offset;
-		strtab_ptr = info->str_tab;
 
 		// find symtab
 		for (int i = 0; i < elf_header->e_shnum; i++){
 			// printf(" [%2d]", i);
 			elf_section_hdr = &elf_section_hdrs[i];
 
-			if (elf_section_hdr->sh_type == SHT_SYMTAB || elf_section_hdr->sh_type == SHT_DYNSYM)
+			if (
+				(elf_section_hdr->sh_type == SHT_SYMTAB
+				|| elf_section_hdr->sh_type == SHT_DYNSYM)
+				&& elf_section_hdr->sh_link != 0)
 			{
-				char* sh_name_str = ((char*)strtab_ptr + elf_section_hdr->sh_name);
+				info->sym_tab = (void *) info->m_elf + elf_section_hdr->sh_offset;
+				break;
+			// 	char* sh_name_str = (char*)(info->str_tab + elf_section_hdr->sh_name);
 
-				printf(" %-16s (%2x) %016lx %08lx %08lx %4x %4x %4x %4x\n",
-					sh_name_str, elf_section_hdr->sh_type,
-					elf_section_hdr->sh_addr, elf_section_hdr->sh_offset,
-					elf_section_hdr->sh_size, elf_section_hdr->sh_entsize,
-					elf_section_hdr->sh_flags, elf_section_hdr->sh_link,
-					elf_section_hdr->sh_info);
-			}
+			// 	printf(" %-16s (%2x) %016lx %08lx %08lx %4x %4x %4x %4x\n",
+			// 		sh_name_str, elf_section_hdr->sh_type,
+			// 		elf_section_hdr->sh_addr, elf_section_hdr->sh_offset,
+			// 		elf_section_hdr->sh_size, elf_section_hdr->sh_entsize,
+			// 		elf_section_hdr->sh_flags, elf_section_hdr->sh_link,
+			// 		elf_section_hdr->sh_info);
+			// }
 		}
+		// looop through symbol table. TODO: get number of symbols or other iterator from symtab section header
+		// - cast into Elf64_Sym. Use that to print symbol name using strtab, and then categorize/build output table
+			// 		typedef struct {
+			// Elf32_Word st_name;
+			// Elf32_Addr st_value;
+			// Elf32_Word st_size;
+			// unsigned char st_info;
+			// unsigned char st_other;
+			// Elf32_Half st_shndx;
+			// } Elf32_Sym;
 	}
 }
 
@@ -98,6 +112,7 @@ int	main(int argc, char **argv)
 	t_info	*info;
 	info = (t_info *) malloc(sizeof(t_info) * 1);
 	info->m_elf = 0;
+	info->sym_tab = 0;
 	info->str_tab = 0;
 	info->is32 = false;
 
