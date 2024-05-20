@@ -9,6 +9,9 @@ OBJDIR = objs/
 OBJLIST = $(patsubst %.c, %.o, $(FILES))
 OBJS = $(addprefix $(OBJDIR), $(OBJLIST))
 
+LIBFT = libft/libft.a
+
+MAKE = make
 
 CC = gcc
 FLAGS = -Wall -Wextra -Werror
@@ -19,8 +22,10 @@ DBG =  -g
 all = $(NAME)
 
 $(NAME): $(OBJDIR) $(OBJS)
+	@echo "Compiling libft"
+	@$(MAKE) -C libft
 	@echo "Linking ft_nm: $(OBJS)"
-	@$(CC) $(OBJS) $(FSAN) -o $(NAME)
+	@$(CC) $(OBJS) $(FSAN) $(LIBFT) -o $(NAME)
 
 $(OBJDIR):
 	@mkdir -p $(OBJDIR)
@@ -30,15 +35,15 @@ $(OBJS): $(FILES)
 	@$(CC) $(FLAGS) $(DBG) -c $(FILES)
 	@mv $(OBJLIST) $(OBJDIR)
 
-docker-up:
-	docker compose up --build --detach
-
 clean:
+	@echo "make clean libft"
+	@$(MAKE) clean -C libft
 	@echo "Deleting object files in /objs"
 	@rm -rf $(OBJDIR)
 
 fclean: clean
 	@echo "deleting $(NAME)"
+	@echo "$(MAKE) fclean -C libft"
 	@rm -rf $(NAME)
 
 re: fclean all

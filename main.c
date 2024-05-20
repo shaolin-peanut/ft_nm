@@ -1,6 +1,6 @@
 # include "include/ft_nm.h"
 
-void	init_info(t_info	*info)
+void	init_info(t_einfo	*info)
 {
 	info->m_elf = 0;
 	info->elf_size = 0;
@@ -14,7 +14,7 @@ void	init_info(t_info	*info)
 }
 
 // returns file size
-int	elf_setup(int argc, char **argv, t_info *info)
+int	elf_setup(int argc, char **argv, t_einfo *info)
 {
 	struct stat		elf_info;
 	int				ret;
@@ -43,7 +43,7 @@ int	elf_setup(int argc, char **argv, t_info *info)
 	return (fd);
 }
 
-void	init_32(t_info *info)
+void	init_32(t_einfo *info)
 {
 	Elf32_Ehdr	*elf_header = (Elf32_Ehdr *) info->m_elf;
 	Elf32_Shdr	*elf_section_hdrs = (Elf32_Shdr *)((char *)info->m_elf + elf_header->e_shoff);
@@ -68,13 +68,13 @@ void	init_32(t_info *info)
 			info->symsize = elf_section_hdr->sh_entsize;
 			info->symcount = (int) elf_section_hdr->sh_size / info->symsize;
 		}
-		if (strncmp(".strtab", section_name, 7) == 0)
+		if (ft_strncmp(".strtab", section_name, 7) == 0)
 			info->sym_str_tab = (void *) info->m_elf + elf_section_hdr->sh_offset;
 	}
 }
 
 // get the string tables and symbol metadata + pointers
-void	init_64(t_info	*info)
+void	init_64(t_einfo	*info)
 {
 	Elf64_Ehdr	*elf_header = (Elf64_Ehdr *) info->m_elf;
 	Elf64_Shdr	*elf_section_hdrs = (Elf64_Shdr *)((char *)info->m_elf + elf_header->e_shoff);
@@ -99,7 +99,7 @@ void	init_64(t_info	*info)
 			info->symsize = elf_section_hdr->sh_entsize;
 			info->symcount = (int) elf_section_hdr->sh_size / info->symsize;
 		}
-		if (strncmp(".strtab", section_name, 7) == 0)
+		if (ft_strncmp(".strtab", section_name, 7) == 0)
 			info->sym_str_tab = (void *) info->m_elf + elf_section_hdr->sh_offset;
 	}
 }
@@ -107,8 +107,8 @@ void	init_64(t_info	*info)
 int	main(int argc, char **argv)
 {
 	int				fd;
-	t_info			info_struct;
-	t_info			*info = &info_struct;
+	t_einfo			info_struct;
+	t_einfo			*info = &info_struct;
 
 	init_info(info);
 

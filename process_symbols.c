@@ -1,6 +1,6 @@
 #include "include/ft_nm.h"
 
-char    *get_sym_name_ptr(t_info *info, int i)
+char    *get_sym_name_ptr(t_einfo *info, int i)
 {
     if (info->is32) {
         Elf32_Sym   *sym = (Elf32_Sym *) (info->sym_tab + (i * info->symsize));
@@ -11,7 +11,7 @@ char    *get_sym_name_ptr(t_info *info, int i)
     }
 }
 
-uint64_t    get_value(t_info *info, int i)
+uint64_t    get_value(t_einfo *info, int i)
 {
     if (info->is32) {
         Elf32_Sym   *sym = (Elf32_Sym *) (info->sym_tab + (i * info->symsize));
@@ -22,7 +22,7 @@ uint64_t    get_value(t_info *info, int i)
     }
 }
 
-char    get_type32(t_info   *info, int i)
+char    get_type32(t_einfo   *info, int i)
 {
     Elf32_Ehdr      *elf_header = (Elf32_Ehdr *) info->m_elf;
     Elf32_Sym       *sym = (Elf32_Sym *) (info->sym_tab + (i * info->symsize));
@@ -77,7 +77,7 @@ char    get_type32(t_info   *info, int i)
     return ('?');
 }
 
-char    get_type64(t_info  *info, int  i)
+char    get_type64(t_einfo  *info, int  i)
 {
     Elf64_Ehdr      *elf_header = (Elf64_Ehdr *) info->m_elf;
     Elf64_Sym       *sym = (Elf64_Sym *) (info->sym_tab + (i * info->symsize));
@@ -145,7 +145,7 @@ bool    filter_out(char type, char *name) {
     return (strlen(name) == 0 || type == 'F' || type == 'X');
 }
 
-void    fill_tab(t_row *output_tab, t_info *info, int count)
+void    fill_tab(t_row *output_tab, t_einfo *info, int count)
 {
     init_output_tab(output_tab, count);
     int symtab_index = 0;
@@ -172,7 +172,7 @@ int tablen(t_row *tab)
     return i;
 }
 
-int    count_symbols(t_info *info)
+int    count_symbols(t_einfo *info)
 {
     int symtab_index = 0;
     int out_i = 0;
@@ -192,17 +192,22 @@ void    print_symbols(t_row *tab, int count)
 {
     for (int i = 0; i < count; i++)
     {
-        if (tab[i].value || tab[i].type == 'T')
-            printf("%016lx ", (long unsigned int) tab[i].value);
-        else
-            printf("%16c ", ' ');
-        printf("%c ", tab[i].type);
+        if (tab[i].value || tab[i].type == 'T') {
+            int len = ft_nbrlen_base(tab[i].value, 16); // get the length of the hex value
+            for (int j = 16 - len; j > 0; j--)
+                ft_printf("0");
+            ft_printf("%x ", tab[i].value);
+        }
+        else {
+            ft_printf("                 "); 
+        }
+	    ft_printf("%c ", tab[i].type);
         if (tab[i].name)
-            printf("%s\n", tab[i].name);
+            ft_printf("%s\n", tab[i].name);
     }
 }
 
-void    process_symbols(t_info  *info)
+void    process_symbols(t_einfo  *info)
 {
     int symc = count_symbols(info);
     t_row   output_tab[symc];
@@ -212,16 +217,4 @@ void    process_symbols(t_info  *info)
     sort(output_tab, 0, symc - 1);
 
     print_symbols(output_tab, symc);
-    // for (int i = 0; i < symc; i++)
-    // {
-    //         output_tab[i].print = true;
-    //         if (output_tab[i].value && output_tab[i].type == 'T')
-    //             printf("%016lx ", (long unsigned int) output_tab[i].value);
-    //         else
-    //             printf("%16c ", ' ');
-    //         printf("%c ", output_tab[i].type);
-    //         if (output_tab[i].name)
-    //             printf("%s\n", output_tab[i].name);
-
-    // }
 }
