@@ -134,7 +134,7 @@ void    init_output_tab(t_row *tab, int count)
 }
 
 bool    filter_out(char type, char *name) {
-    return (strlen(name) == 0);
+    return (strlen(name) == 0 || type == 'F');
     // return (type == 'F' || strlen(name) == 0);
 }
 
@@ -152,6 +152,13 @@ void    process_symbols(t_info  *info)
         output_tab[i].value = get_value(info, i);
         output_tab[i].type = info->is32 ? get_type32(info, i) : get_type64(info, i);
         output_tab[i].name = get_sym_name_ptr(info, i);
+        // printf("%-35s | %-16s\n", output_tab[i].name, output_tab[i].value);
+            // foundc++;
+            // notfound++;
+    }
+    sort(output_tab, 0, info->symcount - 1);
+    for (int i = 0; i < info->symcount; i++)
+    {
         if (!filter_out(output_tab[i].type, output_tab[i].name)) {
             output_tab[i].print = true;
             if (output_tab[i].value)
@@ -164,9 +171,6 @@ void    process_symbols(t_info  *info)
                 printf("%-35s \n", output_tab[i].name);
 
         }
-        // printf("%-35s | %-16s\n", output_tab[i].name, output_tab[i].value);
-            // foundc++;
-            // notfound++;
     }
         // // all section dependent types have STT_OBJECT as type
         // if (row->type)

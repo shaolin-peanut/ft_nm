@@ -54,6 +54,7 @@ typedef struct	s_info {
 void	exit_err(char *msg, int exit_code);
 bool	check_elf_validity(char *mapped_elf);
 void	free_all(t_info	*info);
+void	swap_ptr(void *a, void *b);
 
 // parse_elf.c
 void	parse_elf(t_info	*info);

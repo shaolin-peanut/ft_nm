@@ -27,5 +27,12 @@ bool check_elf_validity(char *mapped_elf) {
 		);
 }
 
+void    swap_ptr(void *a, void *b)
+{
+    void    *tmp = a;
+    a = b;
+    b = tmp;
+}
+
 
 #endif

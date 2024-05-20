@@ -41,32 +41,32 @@ int	elf_setup(int argc, char **argv, int *fd, t_info *info)
 int	init_64(t_info	*info)
 {
 	Elf64_Ehdr	*elf_header = (Elf64_Ehdr *) info->m_elf;
-		Elf64_Shdr	*elf_section_hdrs = (Elf64_Shdr *)((char *)info->m_elf + elf_header->e_shoff);
-		Elf64_Shdr	*elf_section_hdr = 0;
+	Elf64_Shdr	*elf_section_hdrs = (Elf64_Shdr *)((char *)info->m_elf + elf_header->e_shoff);
+	Elf64_Shdr	*elf_section_hdr = 0;
 
-		Elf64_Shdr	shstrab_sh;
-		Elf64_Shdr	symstrab_sh;
-		info->type = elf_header->e_type;
+	Elf64_Shdr	shstrab_sh;
+	Elf64_Shdr	symstrab_sh;
+	info->type = elf_header->e_type;
 
-		if (!(info->type == ET_REL || info->type == ET_EXEC || info->type == ET_DYN))
-			exit_err("Invalid file type", 42);
-		shstrab_sh = (Elf64_Shdr)(elf_section_hdrs[elf_header->e_shstrndx]);
-		info->sh_str_tab = (void *) info->m_elf + shstrab_sh.sh_offset;
+	if (!(info->type == ET_REL || info->type == ET_EXEC || info->type == ET_DYN))
+		exit_err("Invalid file type", 42);
+	shstrab_sh = (Elf64_Shdr)(elf_section_hdrs[elf_header->e_shstrndx]);
+	info->sh_str_tab = (void *) info->m_elf + shstrab_sh.sh_offset;
 
-		for (int i = 0; i < elf_header->e_shnum; i++) {
-			if (info->sh_str_tab && info->sym_str_tab)
-				break;
-			elf_section_hdr = &elf_section_hdrs[i];
-			char	*section_name = (char *)(info->sh_str_tab + elf_section_hdr->sh_name);
+	for (int i = 0; i < elf_header->e_shnum; i++) {
+		if (info->sh_str_tab && info->sym_str_tab)
+			break;
+		elf_section_hdr = &elf_section_hdrs[i];
+		char	*section_name = (char *)(info->sh_str_tab + elf_section_hdr->sh_name);
 
-			if (elf_section_hdr->sh_type == SHT_SYMTAB) {
-				info->sym_tab = (void *) info->m_elf + elf_section_hdr->sh_offset;
-				info->symsize = elf_section_hdr->sh_entsize;
-				info->symcount = (int) elf_section_hdr->sh_size / info->symsize;
-			}
-			if (strncmp(".strtab", section_name, 7) == 0)
-				info->sym_str_tab = (void *) info->m_elf + elf_section_hdr->sh_offset;
+		if (elf_section_hdr->sh_type == SHT_SYMTAB) {
+			info->sym_tab = (void *) info->m_elf + elf_section_hdr->sh_offset;
+			info->symsize = elf_section_hdr->sh_entsize;
+			info->symcount = (int) elf_section_hdr->sh_size / info->symsize;
 		}
+		if (strncmp(".strtab", section_name, 7) == 0)
+			info->sym_str_tab = (void *) info->m_elf + elf_section_hdr->sh_offset;
+	}
 }
 
 int	main(int argc, char **argv)
