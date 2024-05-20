@@ -71,8 +71,8 @@ int	init_64(t_info	*info)
 
 int	main(int argc, char **argv)
 {
-	int				fd = 0;
-	int				elf_size = 0;
+	int				fd;
+	int				elf_size;
 	char			*mapped_elf;
 	t_info			info_struct;
 	t_info			*info = &info_struct;
