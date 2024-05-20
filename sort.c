@@ -9,28 +9,33 @@ void  sort(t_row  *array, int low, int high)
   sort(array, pivot + 1, high);
 }
 
+char  *get_name(t_row *array, int index)
+{
+  int plus = (array[index].name[0] == '_' ? 1 : 0) + (array[index].name[1] == '_' ? 1 : 0);
+  return (array[index].name + plus);
+}
+
 int partition(t_row *array, int low, int high)
 {
-    int i = low;
-    int plus = (array[high].name[0] == '_' ? 1 : 0) + (array[high].name[1] == '_' ? 1 : 0);
-    char  *pivot = array[high].name + plus;
+    int left = low;
+    char *pivot = get_name(array, high);
 
-    for (int j = low; j < high; j++)
+    for (int right = low; right < high; right++)
     {
-      int plus = (array[j].name[0] == '_' ? 1 : 0) + (array[j].name[1] == '_' ? 1 : 0);
-      if (strcasecmp(array[j].name + plus, pivot) < 0)
+      int plus = (array[right].name[0] == '_' ? 1 : 0) + (array[right].name[1] == '_' ? 1 : 0);
+      if (strcmp(array[right].name + plus, pivot + plus) < 0)
       { // if less than or equal to pivot, swap array[j] and pivot
-        t_row temp = array[i];
-        array[i] = array[j];
-        array[j] = temp;
-        i++;
+        t_row temp = array[left];
+        array[left] = array[right];
+        array[right] = temp;
+        left++;
       }
     }
-    t_row temp = array[i];
-    array[i] = array[high];
+    t_row temp = array[left];
+    array[left] = array[high];
     array[high] = temp;
 
-    return (i);
+    return (left);
 }
 
 
