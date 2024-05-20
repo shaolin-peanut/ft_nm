@@ -1,44 +1,36 @@
 # include "include/ft_nm.h"
 
-void swap(t_row *a, t_row *b) {
-  t_row temp = *a;
-  *a = *b; 
-  *b = temp;
+void  sort(t_row  *array, int low, int high)
+{
+  if (low >= high || low < 0)
+    return;
+  int pivot = partition(array, low, high);
+  sort(array, low, pivot - 1);
+  sort(array, pivot + 1, high);
 }
 
-void sort(t_row *array, int low, int high) {
+int partition(t_row *array, int low, int high)
+{
+    int i = low;
+    int plus = (array[high].name[0] == '_' ? 1 : 0) + (array[high].name[1] == '_' ? 1 : 0);
+    char  *pivot = array[high].name + plus;
 
-  if (low < high) {
-    int pivot_index = partition(array, low, high);
+    for (int j = low; j < high; j++)
+    {
+      int plus = (array[j].name[0] == '_' ? 1 : 0) + (array[j].name[1] == '_' ? 1 : 0);
+      if (strcasecmp(array[j].name + plus, pivot) < 0)
+      { // if less than or equal to pivot, swap array[j] and pivot
+        t_row temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+        i++;
+      }
+    }
+    t_row temp = array[i];
+    array[i] = array[high];
+    array[high] = temp;
 
-    sort(array, low, pivot_index - 1); 
-    sort(array, pivot_index + 1, high);
-  }
-
+    return (i);
 }
 
-int partition(t_row *array, int low, int high) {
 
-  t_row pivot = array[low];  
-
-  int i = low - 1; 
-  int j = high + 1;
-
-  while (true) {
-
-    do {
-      i++; 
-    } while (strcmp(array[i].name, pivot.name) < 0);
-
-    do { 
-      j--;
-    } while (strcmp(array[j].name, pivot.name) > 0);
-
-    if (i >= j)
-      return j;
-
-    swap(&array[i], &array[j]);
-
-  }
-
-}

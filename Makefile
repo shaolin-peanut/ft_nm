@@ -3,7 +3,7 @@ NAME = ft_nm
 HEADERDIR = include/
 HEADERS = $(HEADERDIR)ft_nm.h
 
-FILES = main.c utils.c process_symbols.c
+FILES = main.c utils.c process_symbols.c sort.c
 
 OBJDIR = objs/
 OBJLIST = $(patsubst %.c, %.o, $(FILES))
@@ -12,9 +12,9 @@ OBJS = $(addprefix $(OBJDIR), $(OBJLIST))
 
 CC = gcc
 FLAGS = # -Wall -Wextra -Werror
-FSAN = -fsanitize=address
+FSAN = # -fsanitize=address
 DEBUGGER = gdb
-DBG = # -g
+DBG =  -g
 
 all = $(NAME)
 

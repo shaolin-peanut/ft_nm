@@ -91,20 +91,17 @@ char    get_type64(t_info  *info, int  i)
     if (sym->st_shndx == SHN_ABS)
         return type == STT_FILE ? 'F' : 'A';
     // W is good, w was applied to one of 4 expected matches
-    if (binding == STB_WEAK)
+	if (binding == STB_WEAK)
         return (undef ? 'w' : 'W');
+	if (undef && (type == STT_NOTYPE || type == STT_FUNC))
+        return ('U');
+    
     if (type == STT_COMMON || (type == STT_OBJECT && sym->st_shndx == SHN_COMMON))
         return ('C');
     //  
     if ((type == STT_OBJECT || type == STT_NOTYPE) && (section.sh_flags & SHF_ALLOC)) {
         if (sh_type == SHT_NOBITS) // it's in the bss section, or sbss if small
-        {
-            // if (strncmp(n, ".sbss", 5) == 0)
-            if (intel_small) // small bss a.k.a sbss
-                return (local ? 's' : 'S');
-            else // bss
-                return (local ? 'b' : 'B');
-        }
+			return intel_small ? (local? 's':'S'):(local? 'b':'B');
         else if (section.sh_flags & SHF_WRITE) // not in bss, so it's initialized data section (g for small, d for regular)
             return intel_small ? (local? 'g' : 'G') : (local? 'd' : 'D');
         return local? 'r' : 'R'; // RO (const) data section if it fits all these but not writeable
@@ -112,11 +109,10 @@ char    get_type64(t_info  *info, int  i)
     if (type == STT_FUNC && section.sh_flags & SHF_EXECINSTR)
         return (local ? 't' : 'T');
     if (type == STT_SECTION)
-        return ('S');
+        return ('X');
     if (type == STT_TLS)
         return ('T');
-    if ((type == STT_NOTYPE || type == STT_FUNC) && undef)
-        return ('U'); 
+     
     if (type == STT_GNU_IFUNC)
         return ('i');
     return ('?');
@@ -134,33 +130,66 @@ void    init_output_tab(t_row *tab, int count)
 }
 
 bool    filter_out(char type, char *name) {
-    return (strlen(name) == 0 || type == 'F');
+    return (strlen(name) == 0 || type == 'F' || type == 'X');
 }
 
-void    fill_tab(t_row *output_tab, t_info *info)
+void    fill_tab(t_row *output_tab, t_info *info, int count)
 {
-    init_output_tab(output_tab, info->symcount);
+    init_output_tab(output_tab, count);
+    int symtab_index = 0;
+    int out_i = 0;
 
-    for (int i = 0; i < info->symcount; i++)
+    while (symtab_index < info->symcount)
     {
-        output_tab[i].value = get_value(info, i);
-        output_tab[i].type = info->is32 ? get_type32(info, i) : get_type64(info, i);
-        output_tab[i].name = get_sym_name_ptr(info, i);
+        char    type = info->is32 ? get_type32(info, symtab_index) : get_type64(info, symtab_index);
+        if (!filter_out(type, get_sym_name_ptr(info, symtab_index))) {
+            output_tab[out_i].value = get_value(info, symtab_index);
+            output_tab[out_i].type = type;
+            output_tab[out_i].name = get_sym_name_ptr(info, symtab_index);
+            out_i++;
+        }
+        symtab_index++;
     }
+}
+
+int tablen(t_row *tab)
+{
+    int i = 0;
+    while (tab[i].name)
+        i++;
+    return i;
+}
+
+int    count_symbols(t_info *info)
+{
+    int symtab_index = 0;
+    int out_i = 0;
+
+    while (symtab_index < info->symcount)
+    {
+        char    type = info->is32 ? get_type32(info, symtab_index) : get_type64(info, symtab_index);
+        if (!filter_out(type, get_sym_name_ptr(info, symtab_index))) {
+            out_i++;
+        }
+        symtab_index++;
+    }
+    return out_i;
 }
 
 void    process_symbols(t_info  *info)
 {
-    t_row   output_tab[info->symcount];
+    int symc = count_symbols(info);
+    t_row   output_tab[symc];
     int foundc = 0;
     int notfound = 0;
+    int tab_len = 0;
 
-    fill_tab(output_tab, info);
+    fill_tab(output_tab, info, symc);
     
-    sort(output_tab, 0, info->symcount - 1);
-    for (int i = 0; i < info->symcount - 1; i++)
+    sort(output_tab, 0, symc - 1);
+
+    for (int i = 0; i < symc; i++)
     {
-        if (!filter_out(output_tab[i].type, output_tab[i].name)) {
             output_tab[i].print = true;
             if (output_tab[i].value)
                 printf("%016lx ", (long unsigned int) output_tab[i].value);
@@ -171,6 +200,5 @@ void    process_symbols(t_info  *info)
             if (output_tab[i].name)
                 printf("%-35s \n", output_tab[i].name);
 
-        }
     }
 }
