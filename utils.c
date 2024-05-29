@@ -38,7 +38,7 @@ int	ft_strcasecmp(const char *s1, const char *s2)
 	{
 		c1 = to_lower(string1[i]);
 		c2 = to_lower(string2[i]);
-		if (c1 > c2)
+		if (c1 > c2) // && c1 != '_'
 			return (1);
 		else if (c1 < c2)
 			return (-1);
@@ -47,22 +47,24 @@ int	ft_strcasecmp(const char *s1, const char *s2)
 	return (0);
 }
 
-void	free_all(t_einfo	*info)
+void	free_all(t_data	*info)
 {
 	munmap(info->m_elf, info->elf_size);
 }
 
-void	exit_err(char *msg, int exit_code)
+void	exit_err(char *msg, char *extra, int exit_code)
 {
 	ft_putstr_fd("nm: ", 1);
+	if (extra)
+		ft_putstr_fd(extra, 1);
 	ft_putstr_fd(msg, 1);
 	ft_putstr_fd("\n", 1);
+	if (exit_code == 0)
+		return ;
 	exit(exit_code);
 }
 
 bool check_elf_validity(char *mapped_elf) {
-	// print magic number in human readeable form from mapped elf
-	printf("magic number: %c%c%c%c\n", mapped_elf[0], mapped_elf[1], mapped_elf[2], mapped_elf[3]);
 	return (
 		mapped_elf[0] == ELFMAG0
 		&& mapped_elf[1] == 'E'

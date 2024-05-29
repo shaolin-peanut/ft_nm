@@ -1,6 +1,6 @@
 # include "include/ft_nm.h"
 
-void	init_info(t_einfo	*info)
+void	init_info(t_data	*info)
 {
 	info->m_elf = 0;
 	info->elf_size = 0;
@@ -14,25 +14,30 @@ void	init_info(t_einfo	*info)
 }
 
 // returns file size
-int	elf_setup(char	*path, t_einfo *info)
+int	elf_setup(char	*path, t_data *info)
 {
 	struct stat		elf_info;
 	int				ret;
 	int				fd;
 
-	if((fd = open(path, O_RDWR)) < 0)
-		exit_err("Failed to open file", 1);
+	if((fd = open(path, O_RDWR)) < 0) {
+		exit_err(": No such file", path, 0);
+		// ft_putstr_fd("\n", 1);
+		ft_putchar_fd('\n', 1);
+		return (-1);
+	}
+	// should be like printf("%s: No such file\n", path) but need to change function
 	
 	if((ret = fstat(fd, &elf_info)) < 0)
-		exit_err("fstat error", 1);
+		exit_err("fstat error", 0, 1);
 
 	info->elf_size = elf_info.st_size;
 
 	if((info->m_elf = mmap(NULL, elf_info.st_size, PROT_READ, MAP_PRIVATE, fd, 0)) == MAP_FAILED)
-		exit_err("Failed to map file to memory", 42);
+		exit_err("Failed to map file to memory", 0, 42);
 
 	if (check_elf_validity(info->m_elf) == false) {
-		exit_err("Invalid binary file", 8080);
+		exit_err("Invalid binary file", 0, 8080);
 	}
 
 	info->is32 = (info->m_elf[EI_CLASS] == ELFCLASS32);
@@ -40,7 +45,7 @@ int	elf_setup(char	*path, t_einfo *info)
 	return (fd);
 }
 
-void	init_32(t_einfo *info)
+void	init_32(t_data *info)
 {
 	Elf32_Ehdr	*elf_header = (Elf32_Ehdr *) info->m_elf;
 	Elf32_Shdr	*elf_section_hdrs = (Elf32_Shdr *)((char *)info->m_elf + elf_header->e_shoff);
@@ -50,7 +55,7 @@ void	init_32(t_einfo *info)
 	info->type = elf_header->e_type;
 
 	if (!(info->type == ET_REL || info->type == ET_EXEC || info->type == ET_DYN))
-		exit_err("Invalid file type", 42);
+		exit_err("Invalid file type", 0, 42);
 	shstrab_sh = (Elf32_Shdr)(elf_section_hdrs[elf_header->e_shstrndx]);
 	info->sh_str_tab = (void *) info->m_elf + shstrab_sh.sh_offset;
 
@@ -71,7 +76,7 @@ void	init_32(t_einfo *info)
 }
 
 // get the string tables and symbol metadata + pointers
-void	init_64(t_einfo	*info)
+void	init_64(t_data	*info)
 {
 	Elf64_Ehdr	*elf_header = (Elf64_Ehdr *) info->m_elf;
 	Elf64_Shdr	*elf_section_hdrs = (Elf64_Shdr *)((char *)info->m_elf + elf_header->e_shoff);
@@ -81,7 +86,7 @@ void	init_64(t_einfo	*info)
 	info->type = elf_header->e_type;
 
 	if (!(info->type == ET_REL || info->type == ET_EXEC || info->type == ET_DYN))
-		exit_err("Invalid file type", 42);
+		exit_err("Invalid file type", 0, 42);
 	shstrab_sh = (Elf64_Shdr)(elf_section_hdrs[elf_header->e_shstrndx]);
 	info->sh_str_tab = (void *) info->m_elf + shstrab_sh.sh_offset;
 
@@ -101,15 +106,19 @@ void	init_64(t_einfo	*info)
 	}
 }
 
-void	nm(char *path)
+void	nm(char *path, int i)
 {
 	int				fd;
-	t_einfo			info_struct;
-	t_einfo			*info = &info_struct;
+	t_data			info_struct;
+	t_data			*info = &info_struct; 
 
 	init_info(info);
 
 	fd = elf_setup(path, info);
+	if (fd < 0)
+		return ;
+	else if (i > 2)
+		ft_printf("\n%s:\n", path);
 
 	info->is32 ? init_32(info) : init_64(info);
 	
@@ -122,20 +131,10 @@ void	nm(char *path)
 int	main(int argc, char **argv)
 {
 	if (argc == 1) {
-		int fd = open("a.out", O_RDONLY);
-		if (fd < 0)
-			exit_err("no binary file found", 1);
-		else {
-			close(fd);
-			nm("a.out");
-		}
+			nm("a.out", argc);
 	} else if (argc > 1) {
-		for (int i = 1; i < argc; i++) {
-			ft_printf("\n%s:\n", argv[i]);
-			nm(argv[i]);
-		}
-	} else {
-		exit_err("no binary file found", 1);
+		for (int i = 1; i < argc; i++)
+			nm(argv[i], argc);
 	}
 	return (0);
 }

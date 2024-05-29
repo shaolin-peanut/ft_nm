@@ -49,4 +49,12 @@ fclean: clean
 re: fclean
 	$(MAKE) all
 
+up:
+	@docker-compose up --build --detach && docker ps
+	@docker exec -it nm_ft_nm_1 zsh
+
+
+down:
+	@docker-compose down
+
 .PHONY	: all clean fclean re
