@@ -11,9 +11,8 @@ int ft_nbrlen_base(uint16_t n, int base)
         return 1;
 	}
 
-	for (uint16_t tmp = n; tmp > 0; tmp /= base) {
+	for (uint16_t tmp = n; tmp > 0; tmp /= base)
 		len++;
-	}
     return len;
 }
 
@@ -62,6 +61,8 @@ void	exit_err(char *msg, int exit_code)
 }
 
 bool check_elf_validity(char *mapped_elf) {
+	// print magic number in human readeable form from mapped elf
+	printf("magic number: %c%c%c%c\n", mapped_elf[0], mapped_elf[1], mapped_elf[2], mapped_elf[3]);
 	return (
 		mapped_elf[0] == ELFMAG0
 		&& mapped_elf[1] == 'E'

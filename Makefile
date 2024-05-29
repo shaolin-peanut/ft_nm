@@ -46,6 +46,7 @@ fclean: clean
 	@echo "$(MAKE) fclean -C libft"
 	@rm -rf $(NAME)
 
-re: fclean all
+re: fclean
+	$(MAKE) all
 
 .PHONY	: all clean fclean re

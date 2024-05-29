@@ -14,16 +14,13 @@ void	init_info(t_einfo	*info)
 }
 
 // returns file size
-int	elf_setup(int argc, char **argv, t_einfo *info)
+int	elf_setup(char	*path, t_einfo *info)
 {
 	struct stat		elf_info;
 	int				ret;
 	int				fd;
 
-	if (argc < 2)
-		exit_err("no binary file found", 1);
-
-	if((fd = open(argv[1], O_RDWR)) < 0)
+	if((fd = open(path, O_RDWR)) < 0)
 		exit_err("Failed to open file", 1);
 	
 	if((ret = fstat(fd, &elf_info)) < 0)
@@ -104,7 +101,7 @@ void	init_64(t_einfo	*info)
 	}
 }
 
-int	main(int argc, char **argv)
+void	nm(char *path)
 {
 	int				fd;
 	t_einfo			info_struct;
@@ -112,7 +109,7 @@ int	main(int argc, char **argv)
 
 	init_info(info);
 
-	fd = elf_setup(argc, argv, info);
+	fd = elf_setup(path, info);
 
 	info->is32 ? init_32(info) : init_64(info);
 	
@@ -120,5 +117,25 @@ int	main(int argc, char **argv)
 
 	free_all(info);
 	close(fd);
+}
+
+int	main(int argc, char **argv)
+{
+	if (argc == 1) {
+		int fd = open("a.out", O_RDONLY);
+		if (fd < 0)
+			exit_err("no binary file found", 1);
+		else {
+			close(fd);
+			nm("a.out");
+		}
+	} else if (argc > 1) {
+		for (int i = 1; i < argc; i++) {
+			ft_printf("\n%s:\n", argv[i]);
+			nm(argv[i]);
+		}
+	} else {
+		exit_err("no binary file found", 1);
+	}
 	return (0);
 }
