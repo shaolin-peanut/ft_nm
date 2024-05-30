@@ -25,8 +25,6 @@ void  swap(t_row *array, int left, int right)
   array[right] = temp;
 }
 
-// quicksort
-
 void  sort(t_row *array, int low, int high)
 {
   if (low > high || low < 0)
