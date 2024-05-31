@@ -44,7 +44,8 @@ clean:
 
 fclean: clean
 	@echo "deleting $(NAME)"
-	@echo "$(MAKE) fclean -C libft"
+	@echo "make fclean libft"
+	@$(MAKE) fclean -C libft
 	@rm -rf $(NAME)
 
 re: fclean

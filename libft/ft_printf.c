@@ -22,8 +22,10 @@ int	ft_printf(const char *string, ...)
 	t_info	*info;
 	char	*str;
 	int		i;
+	int		ret;
 
 	i = -1;
+	ret = 0;
 	str = (char *) string;
 	info = (t_info *) malloc(sizeof(t_info));
 	if (!info)
@@ -38,6 +40,7 @@ int	ft_printf(const char *string, ...)
 			i += check_flag(info, str, i + 1);
 	}
 	va_end(info->args);
+	ret = info->tlen;
 	free(info);
-	return (info->tlen);
+	return ret;
 }
