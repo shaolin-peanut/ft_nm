@@ -25,6 +25,7 @@ typedef	struct s_row {
 }	t_row;
 
 typedef struct	s_einfo {
+	char		*path;
 	char		*m_elf;
 	int			elf_size;
 	void		*sym_tab;
@@ -45,7 +46,7 @@ void    print_n_z(char c, int n);
 void	*ptr_add(void *ptr, size_t offset);
 int		ft_nbrlen_base(uint16_t n, int base);
 int		ft_strcasecmp(const char *s1, const char *s2);
-void	exit_err(char *msg, char *extra, int exit_code);
+int		err(char *msg, char *extra);
 bool	check_elf_validity(char *mapped_elf);
 void	swap_ptr(void *a, void *b);
 

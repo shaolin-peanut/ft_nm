@@ -12,7 +12,7 @@ void    print_n_z(char c, int n)
 void	*ptr_add(void *ptr, size_t offset)
 {
 	if (offset > (size_t)info.elf_size)
-		exit_err("Invalid file", 0, 42);
+		return (err("file too short", info.path) ? NULL : NULL);
 	return (ptr + offset);
 }
 
@@ -60,16 +60,16 @@ int	ft_strcasecmp(const char *s1, const char *s2)
 	return (0);
 }
 
-void	exit_err(char *msg, char *extra, int exit_code)
+int	err(char *msg, char *extra)
 {
-	ft_putstr_fd("nm: ", 1);
-	if (extra)
-		ft_putstr_fd(extra, 1);
-	ft_putstr_fd(msg, 1);
-	ft_putstr_fd("\n", 1);
-	if (exit_code == 0)
-		return ;
-	exit(exit_code);
+	char *tmp = extra? ft_strjoin(extra, ": ") : NULL;
+	ft_printf(
+		"nm: %s%s\n",
+		tmp ? tmp : "",
+		msg
+	);
+	tmp? free(tmp) : 0;
+	return 0;
 }
 
 bool check_elf_validity(char *mapped_elf) {
