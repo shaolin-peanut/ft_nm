@@ -188,12 +188,6 @@ int    count_symbols()
     return out_i;
 }
 
-void    print_n_z(char c, int n)
-{
-    for (int i = 0; i < n; i++)
-        write(1, &c, 1);
-}
-
 void    print_symbols(t_row *tab, int count, bool is32)
 {
     for (int i = 0; i < count; i++)

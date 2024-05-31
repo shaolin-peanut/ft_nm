@@ -3,6 +3,12 @@
 
 #include "include/ft_nm.h"
 
+void    print_n_z(char c, int n)
+{
+    for (int i = 0; i < n; i++)
+        write(1, &c, 1);
+}
+
 void	*ptr_add(void *ptr, size_t offset)
 {
 	if (offset > (size_t)info.elf_size)

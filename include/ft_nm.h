@@ -41,6 +41,7 @@ typedef struct	s_einfo {
 extern t_data			info;
 
 // utils
+void    print_n_z(char c, int n);
 void	*ptr_add(void *ptr, size_t offset);
 int		ft_nbrlen_base(uint16_t n, int base);
 int		ft_strcasecmp(const char *s1, const char *s2);
