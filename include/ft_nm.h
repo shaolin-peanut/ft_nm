@@ -38,22 +38,21 @@ typedef struct	s_einfo {
 	t_row		*output_tab;
 }	t_data;
 
+extern t_data			info;
+
 // utils
+void	*ptr_add(void *ptr, size_t offset);
 int		ft_nbrlen_base(uint16_t n, int base);
 int		ft_strcasecmp(const char *s1, const char *s2);
 void	exit_err(char *msg, char *extra, int exit_code);
 bool	check_elf_validity(char *mapped_elf);
-void	free_all(t_data	*info);
 void	swap_ptr(void *a, void *b);
 
 // sort
 void	sort(t_row *array, int low, int high);
 int		partition(t_row *array, int low, int high);
 
-// parse_elf.c
-void	parse_elf(t_data	*info);
-
 // process_symbols.c
-void	process_symbols(t_data  *info);
+void	process_symbols();
 
 #endif

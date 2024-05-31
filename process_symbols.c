@@ -1,31 +1,31 @@
 #include "include/ft_nm.h"
 
-char    *get_sym_name_ptr(t_data *info, int i)
+char    *get_sym_name_ptr(int i)
 {
-    if (info->is32) {
-        Elf32_Sym   *sym = (Elf32_Sym *) (info->sym_tab + (i * info->symsize));
-        return ((char *)(info->sym_str_tab + sym->st_name));
+    if (info.is32) {
+        Elf32_Sym   *sym = (Elf32_Sym *) (info.sym_tab + (i * info.symsize));
+        return ((char *)(info.sym_str_tab + sym->st_name));
     } else {
-        Elf64_Sym   *sym = (Elf64_Sym *) (info->sym_tab + (i * info->symsize));
-        return ((char *)(info->sym_str_tab + sym->st_name));
+        Elf64_Sym   *sym = (Elf64_Sym *) (info.sym_tab + (i * info.symsize));
+        return ((char *)(info.sym_str_tab + sym->st_name));
     }
 }
 
-uint64_t    get_value(t_data *info, int i)
+uint64_t    get_value(int i)
 {
-    if (info->is32) {
-        Elf32_Sym   *sym = (Elf32_Sym *) (info->sym_tab + (i * info->symsize));
+    if (info.is32) {
+        Elf32_Sym   *sym = (Elf32_Sym *) (info.sym_tab + (i * info.symsize));
         return ((uint64_t)(sym->st_value));
     } else {
-        Elf64_Sym   *sym = (Elf64_Sym *) (info->sym_tab + (i * info->symsize));
+        Elf64_Sym   *sym = (Elf64_Sym *) (info.sym_tab + (i * info.symsize));
         return ((uint64_t)(sym->st_value));
     }
 }
 
-char    get_type32(t_data   *info, int i)
+char    get_type32(int i)
 {
-    Elf32_Ehdr      *elf_header = (Elf32_Ehdr *) info->m_elf;
-    Elf32_Sym       *sym = (Elf32_Sym *) (info->sym_tab + (i * info->symsize));
+    Elf32_Ehdr      *elf_header = (Elf32_Ehdr *) info.m_elf;
+    Elf32_Sym       *sym = (Elf32_Sym *) (info.sym_tab + (i * info.symsize));
     Elf32_Shdr      *section_headers = NULL;
     Elf32_Shdr      section;
     Elf32_Word      sh_type = 0;
@@ -37,7 +37,7 @@ char    get_type32(t_data   *info, int i)
     bool            local = false;
 
     if (!index_too_big || undef) {
-        section_headers = (Elf32_Shdr *)(info->m_elf + elf_header->e_shoff);
+        section_headers = (Elf32_Shdr *)(info.m_elf + elf_header->e_shoff);
         section = section_headers[sym->st_shndx];
         sh_type = section.sh_type;
         sh_flags = section.sh_flags;
@@ -77,10 +77,10 @@ char    get_type32(t_data   *info, int i)
     return ('?');
 }
 
-char    get_type64(t_data  *info, int  i)
+char    get_type64(int  i)
 {
-    Elf64_Ehdr      *elf_header = (Elf64_Ehdr *) info->m_elf;
-    Elf64_Sym       *sym = (Elf64_Sym *) (info->sym_tab + (i * info->symsize));
+    Elf64_Ehdr      *elf_header = (Elf64_Ehdr *) info.m_elf;
+    Elf64_Sym       *sym = (Elf64_Sym *) (info.sym_tab + (i * info.symsize));
     Elf64_Shdr      *section_headers = NULL;
     Elf64_Shdr      section;
     Elf64_Word      sh_type = 0;
@@ -92,7 +92,7 @@ char    get_type64(t_data  *info, int  i)
     bool            local = false;
 
     if (!index_too_big || undef) {
-        section_headers = (Elf64_Shdr *)(info->m_elf + elf_header->e_shoff);
+        section_headers = (Elf64_Shdr *)(info.m_elf + elf_header->e_shoff);
         section = section_headers[sym->st_shndx];
         sh_type = section.sh_type;
         sh_flags = section.sh_flags;
@@ -145,19 +145,19 @@ bool    filter_out(char type, char *name) {
     return (strlen(name) == 0 || type == 'F' || type == 'X');
 }
 
-void    fill_tab(t_row *output_tab, t_data *info, int count)
+void    fill_tab(t_row *output_tab, int count)
 {
     init_output_tab(output_tab, count);
     int symtab_index = 0;
     int out_i = 0;
 
-    while (symtab_index < info->symcount)
+    while (symtab_index < info.symcount)
     {
-        char    type = info->is32 ? get_type32(info, symtab_index) : get_type64(info, symtab_index);
-        if (!filter_out(type, get_sym_name_ptr(info, symtab_index))) {
-            output_tab[out_i].value = get_value(info, symtab_index);
+        char    type = info.is32 ? get_type32(symtab_index) : get_type64(symtab_index);
+        if (!filter_out(type, get_sym_name_ptr(symtab_index))) {
+            output_tab[out_i].value = get_value(symtab_index);
             output_tab[out_i].type = type;
-            output_tab[out_i].name = get_sym_name_ptr(info, symtab_index);
+            output_tab[out_i].name = get_sym_name_ptr(symtab_index);
             out_i++;
         }
         symtab_index++;
@@ -172,15 +172,15 @@ int tablen(t_row *tab)
     return i;
 }
 
-int    count_symbols(t_data *info)
+int    count_symbols()
 {
     int symtab_index = 0;
     int out_i = 0;
 
-    while (symtab_index < info->symcount)
+    while (symtab_index < info.symcount)
     {
-        char    type = info->is32 ? get_type32(info, symtab_index) : get_type64(info, symtab_index);
-        if (!filter_out(type, get_sym_name_ptr(info, symtab_index))) {
+        char    type = info.is32 ? get_type32(symtab_index) : get_type64(symtab_index);
+        if (!filter_out(type, get_sym_name_ptr(symtab_index))) {
             out_i++;
         }
         symtab_index++;
@@ -212,14 +212,14 @@ void    print_symbols(t_row *tab, int count, bool is32)
     }
 }
 
-void    process_symbols(t_data  *info)
+void    process_symbols()
 {
-    int symc = count_symbols(info);
+    int symc = count_symbols();
     t_row   output_tab[symc];
 
-    fill_tab(output_tab, info, symc);
+    fill_tab(output_tab, symc);
     
     sort(output_tab, 0, symc - 1);
 
-    print_symbols(output_tab, symc, info->is32);
+    print_symbols(output_tab, symc, info.is32);
 }

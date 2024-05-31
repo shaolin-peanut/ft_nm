@@ -3,6 +3,13 @@
 
 #include "include/ft_nm.h"
 
+void	*ptr_add(void *ptr, size_t offset)
+{
+	if (offset > (size_t)info.elf_size)
+		exit_err("Invalid file", 0, 42);
+	return (ptr + offset);
+}
+
 int ft_nbrlen_base(uint16_t n, int base)
 {
     int len = 0;
@@ -45,11 +52,6 @@ int	ft_strcasecmp(const char *s1, const char *s2)
 		i++;
 	}
 	return (0);
-}
-
-void	free_all(t_data	*info)
-{
-	munmap(info->m_elf, info->elf_size);
 }
 
 void	exit_err(char *msg, char *extra, int exit_code)
