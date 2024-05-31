@@ -4,6 +4,7 @@ HEADERDIR = include/
 HEADERS = $(HEADERDIR)ft_nm.h
 
 FILES = main.c utils.c process_symbols.c sort.c
+SRC = $(addprefix src/, $(FILES))
 
 OBJDIR = objs/
 OBJLIST = $(patsubst %.c, %.o, $(FILES))
@@ -30,9 +31,9 @@ $(NAME): $(OBJDIR) $(OBJS)
 $(OBJDIR):
 	@mkdir -p $(OBJDIR)
 
-$(OBJS): $(FILES)
-	@echo "Compiling ft_nm: $(FILES) and $(HEADERS)"
-	@$(CC) $(FLAGS) $(DBG) -c $(FILES)
+$(OBJS): $(SRC)
+	@echo "Compiling ft_nm: $(SRC) and $(HEADERS)"
+	@$(CC) $(FLAGS) $(DBG) -c $(SRC)
 	@mv $(OBJLIST) $(OBJDIR)
 
 clean:

@@ -1,7 +1,7 @@
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 
-#include "include/ft_nm.h"
+#include "../include/ft_nm.h"
 
 void    print_n_z(char c, int n)
 {

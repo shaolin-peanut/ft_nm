@@ -1,6 +1,4 @@
-# include "include/ft_nm.h"
-
-// utils
+# include "../include/ft_nm.h"
 
 char  *strip_prefix(char *name)
 {
@@ -15,7 +13,7 @@ bool inferior_or_equal(t_row *array, int left, int right)
   int difference = ft_strcasecmp(sleft, sright);
   if (difference == 0)
     return left >= right;
-  return (difference <= 0);
+  return (difference < 0);
 }
 
 void  swap(t_row *array, int left, int right)

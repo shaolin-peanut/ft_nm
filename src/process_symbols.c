@@ -1,4 +1,4 @@
-#include "include/ft_nm.h"
+#include "../include/ft_nm.h"
 
 char    *get_sym_name_ptr(int i)
 {

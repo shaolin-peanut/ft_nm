@@ -1,4 +1,4 @@
-# include "include/ft_nm.h"
+# include "../include/ft_nm.h"
 
 t_data	info;
 
