@@ -32,6 +32,9 @@ int	elf_setup(char	*path)
 
 bool	init_32()
 {
+	if (info.is32 == false)
+		return false;
+
 	Elf32_Ehdr	*elf_header = (Elf32_Ehdr *) info.m_elf;
 	Elf32_Shdr	*section_headers = (Elf32_Shdr *)ptr_add(info.m_elf, elf_header->e_shoff);
 	Elf32_Shdr	*section_header = 0;
@@ -47,6 +50,7 @@ bool	init_32()
 		return false;
 	if (!(info.sh_str_tab = (void *) info.m_elf + shstrab_sh->sh_offset))
 		return false;
+
 
 	for (int i = 0; i < elf_header->e_shnum; i++) {
 		if (info.sh_str_tab && info.sym_str_tab)
@@ -68,6 +72,9 @@ bool	init_32()
 // get the string tables and symbol metadata + pointers
 bool	init_64()
 {
+	if (info.is32 == true)
+		return false;
+
 	Elf64_Ehdr	*elf_header = (Elf64_Ehdr *) info.m_elf;
 	Elf64_Shdr	*section_headers = (Elf64_Shdr *)ptr_add(info.m_elf, elf_header->e_shoff);
 	Elf64_Shdr	*section_header = 0;
@@ -108,9 +115,7 @@ void	nm(char *path, int i)
 	if ((fd = elf_setup(path)) < 1)
 		return ;
 
-	if (info.is32 && init_32() == false)
-		return ;
-	else if (init_64() == false)
+	if (init_32() == false && init_64() == false)
 		return ;
 
 	if (i > 2)
