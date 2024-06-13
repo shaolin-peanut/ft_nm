@@ -2,22 +2,25 @@
 
 char    *get_sym_name_ptr(int i)
 {
+    int index = i * info.symsize;
     if (info.is32) {
-        Elf32_Sym   *sym = (Elf32_Sym *) (info.sym_tab + (i * info.symsize));
-        return ((char *)(info.sym_str_tab + sym->st_name));
+        Elf32_Sym   *sym = (Elf32_Sym *) ptr_add(info.sym_tab, index);
+        return ((char *)ptr_add(info.sym_str_tab, sym->st_name));
     } else {
-        Elf64_Sym   *sym = (Elf64_Sym *) (info.sym_tab + (i * info.symsize));
-        return ((char *)(info.sym_str_tab + sym->st_name));
+        Elf64_Sym   *sym = (Elf64_Sym *) ptr_add(info.sym_tab, index);
+        return ((char *)ptr_add(info.sym_str_tab, sym->st_name));
     }
 }
 
 uint64_t    get_value(int i)
 {
+    int index = i * info.symsize;
     if (info.is32) {
-        Elf32_Sym   *sym = (Elf32_Sym *) (info.sym_tab + (i * info.symsize));
-        return ((uint64_t)(sym->st_value));
+        //Elf32_Sym   *sym = (Elf32_Sym *) (info.sym_tab + (i * info.symsize));
+        Elf32_Sym   *sym = (Elf32_Sym *)ptr_add(info.sym_tab, index);
+        return ((uint32_t)(sym->st_value));
     } else {
-        Elf64_Sym   *sym = (Elf64_Sym *) (info.sym_tab + (i * info.symsize));
+        Elf64_Sym   *sym = (Elf64_Sym *)ptr_add(info.sym_tab, index);
         return ((uint64_t)(sym->st_value));
     }
 }
@@ -25,7 +28,7 @@ uint64_t    get_value(int i)
 char    get_type32(int i)
 {
     Elf32_Ehdr      *elf_header = (Elf32_Ehdr *) info.m_elf;
-    Elf32_Sym       *sym = (Elf32_Sym *) (info.sym_tab + (i * info.symsize));
+    Elf32_Sym       *sym = (Elf32_Sym *)ptr_add(info.sym_tab, i * info.symsize);
     Elf32_Shdr      *section_headers = NULL;
     Elf32_Shdr      section;
     Elf32_Word      sh_type = 0;
@@ -37,7 +40,8 @@ char    get_type32(int i)
     bool            local = false;
 
     if (!index_too_big || undef) {
-        section_headers = (Elf32_Shdr *)(info.m_elf + elf_header->e_shoff);
+        // section_headers = (Elf32_Shdr *)(info.m_elf + elf_header->e_shoff);
+        section_headers = (Elf32_Shdr *)ptr_add(info.m_elf, elf_header->e_shoff);
         section = section_headers[sym->st_shndx];
         sh_type = section.sh_type;
         sh_flags = section.sh_flags;
@@ -48,7 +52,6 @@ char    get_type32(int i)
 
     local = binding == STB_LOCAL;
 
-    // char    *n = sym->section_name;
     if (sym->st_shndx == SHN_ABS) {
         return type == STT_FILE ? 'F' : 'A';
     }
@@ -80,7 +83,7 @@ char    get_type32(int i)
 char    get_type64(int  i)
 {
     Elf64_Ehdr      *elf_header = (Elf64_Ehdr *) info.m_elf;
-    Elf64_Sym       *sym = (Elf64_Sym *) (info.sym_tab + (i * info.symsize));
+    Elf64_Sym       *sym = (Elf64_Sym *)ptr_add(info.sym_tab, i * info.symsize);
     Elf64_Shdr      *section_headers = NULL;
     Elf64_Shdr      section;
     Elf64_Word      sh_type = 0;
@@ -92,7 +95,7 @@ char    get_type64(int  i)
     bool            local = false;
 
     if (!index_too_big || undef) {
-        section_headers = (Elf64_Shdr *)(info.m_elf + elf_header->e_shoff);
+        section_headers = (Elf64_Shdr *)ptr_add(info.m_elf, elf_header->e_shoff);
         section = section_headers[sym->st_shndx];
         sh_type = section.sh_type;
         sh_flags = section.sh_flags;
@@ -130,24 +133,13 @@ char    get_type64(int  i)
     return ('?');
 }
 
-void    init_output_tab(t_row *tab, int count)
-{
-    for (int i = 0; i < count; i++)
-    {
-        tab[i].value = 0;
-        tab[i].type = 0;
-        tab[i].print = false;
-        tab[i].name = 0;
-    }
-}
-
 bool    filter_out(char type, char *name) {
     return (strlen(name) == 0 || type == 'F' || type == 'X');
 }
 
 void    fill_tab(t_row *output_tab, int count)
 {
-    init_output_tab(output_tab, count);
+    bzero(output_tab, sizeof(t_row) * count);
     int symtab_index = 0;
     int out_i = 0;
 
@@ -188,17 +180,17 @@ int    count_symbols()
     return out_i;
 }
 
-void    print_symbols(t_row *tab, int count, bool is32)
+void    print_symbols(t_row *tab, int count)
 {
     for (int i = 0; i < count; i++)
     {
         if (tab[i].value || tab[i].type == 'T') {
             int len = ft_nbrlen_base(tab[i].value, 16); // get the length of the hex value
-            print_n_z('0', (is32? 8 : 16) - len);
+            print_n_z('0', (info.is32 ? 8 : 16) - len);
             ft_printf("%x ", tab[i].value);
         }
         else {
-            print_n_z(' ', is32 ? 9 : 17);
+            print_n_z(' ', info.is32 ? 9 : 17);
         }
 	    ft_printf("%c ", tab[i].type);
         if (tab[i].name)
@@ -215,5 +207,5 @@ void    process_symbols()
     
     sort(output_tab, 0, symc - 1);
 
-    print_symbols(output_tab, symc, info.is32);
+    print_symbols(output_tab, symc);
 }

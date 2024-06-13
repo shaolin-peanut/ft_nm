@@ -34,7 +34,6 @@ typedef struct	s_einfo {
 	void		*sh_str_tab;
 	void		*sym_str_tab;
 	bool		is32;
-	int			type;
 	void		*symbols;
 	t_row		*output_tab;
 }	t_data;

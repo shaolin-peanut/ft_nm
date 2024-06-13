@@ -52,8 +52,8 @@ re: fclean
 	$(MAKE) all
 
 up:
-	@docker-compose up --build --detach && docker ps
-	@docker exec -it nm_ft_nm_1 zsh
+	@docker-compose up --build --detach
+	@docker exec -it `docker ps -q | tail -1`  zsh
 
 down:
 	@docker-compose down
