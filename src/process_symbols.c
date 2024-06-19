@@ -127,7 +127,6 @@ char    get_type64(int  i)
         return ('X');
     if (type == STT_TLS)
         return ('T');
-     
     if (type == STT_GNU_IFUNC)
         return ('i');
     return ('?');
@@ -180,11 +179,18 @@ int    count_symbols()
     return out_i;
 }
 
+bool    print_zero_too(char c)
+{
+    if (c == 'T' || c == 'D' || c == 'B')
+        return true;
+    return false;
+}
+
 void    print_symbols(t_row *tab, int count)
 {
     for (int i = 0; i < count; i++)
     {
-        if (tab[i].value || tab[i].type == 'T') {
+        if (tab[i].value || print_zero_too(tab[i].type)) {
             int len = ft_nbrlen_base(tab[i].value, 16); // get the length of the hex value
             print_n_z('0', (info.is32 ? 8 : 16) - len);
             ft_printf("%x ", tab[i].value);

@@ -10,7 +10,7 @@ int	elf_setup(char	*path)
 	int				fd;
 
 	ft_bzero(&info, sizeof(t_data));
-	if((fd = open(path, O_RDWR)) < 0)
+	if((fd = open(path, O_RDONLY)) < 0)
 		return (err(": No such file", path));
 	
 	if((ret = fstat(fd, &elf_info)) < 0)
